@@ -1,7 +1,7 @@
 import streamlit as st
 
-st.title("Job Finder App")
-st.write("This app helps you find job listings using the JSearch API.")
+st.title("Job bank App")
+st.write("This app helps you find job listings.")
 
 # 100 elements, 4 per row = 25 rows
 total_items = 100
@@ -17,3 +17,5 @@ for row in range(0, total_items, items_per_row):
                 with st.container(border=True):
                     if st.button(f"Box {item_num}", key=f"btn_{item_num}"):
                         st.write(f"You clicked Box {item_num}")
+                    elif st.button(f"Link {item_num}", key=f"link_{item_num}"):
+                        st.write(f"You clicked Link {item_num}")
