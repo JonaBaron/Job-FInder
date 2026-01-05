@@ -3,24 +3,127 @@ from job import status
 from job_card import *
 from job_finder import find_jobs
 
-# ---------- APP ----------
-st.title("Job bank App 📋")
+## to implement later
+# db
+# csv
+# balloons: st.balloons()
 
-with st.container(horizontal=True):
-    st.write("This app helps you find job listings.")
-    st.button("Refresh 🎲")
+
+#-- SIDEBAR ----------
+
+# function to load querries to refine later
+def load_queries():
+    return ["Computer Engineering - Canada - internship", "Electrical Engineering - Canada - internship",
+             "Software Engineering - Canada - internship", "Data Science - Canada - internship"]
+
+#Option 1 dialog
+@st.dialog("Info ℹ️")
+def info_dialog():
+    st.write("# Made by Jonathan Mehmannavaz👋")
+    st.write("""
+    ## An app made with intention  🎯
+
+    This Job Bank App is designed to help users find and manage job listings efficiently. Below are some key features and information about the app:
+
+    ### Features:
+    - **Job Search**: Find job listings based on your queries.
+    - **Job Status Tracking**: Keep track of the status of each job application.
+    - **Custom Queries**: Add and manage your own job search queries.
+    - **Filters**: Sort and filter job listings based on status and company.
+
+    ### How to Use:
+    1. ....
+ 
+
+    ### Follow ME!
+    """)
+    with st.container(horizontal=True): 
+        st.link_button("GitHub", icon=":material/code:", url="https://github.com/JonaBaron")
+        st.link_button("LinkedIn", icon=":material/work:", url="https://www.linkedin.com/in/jonathan-mehmannavaz/")
+        st.link_button("Webpage", icon=":material/web:", url="https://jonabaron.github.io/")
+   
+
+
+
+
+
+#Option 2 dialog
+@st.dialog("My Queries 📋")
+def my_queries_dialog():
+    if 'queries' not in st.session_state:
+        st.session_state.queries = load_queries()
+    
+    # Track which query to delete (if any)
+    to_delete = None
+    
+    for i, q in enumerate(st.session_state.queries):
+        col_input, col_btn = st.columns([5, 1])
+        with col_input:
+            st.session_state.queries[i] = st.text_input(
+                f"Query {i+1}", value=q, key=f"prev_query_{id(q)}_{i}"
+            )
+        with col_btn:
+            st.write("")  # Spacing to align with input
+            if st.button("", icon=":material/delete:", key=f"delete_{id(q)}_{i}"):
+                to_delete = i
+    
+    # Delete after the loop to avoid index shifting mid-iteration
+    if to_delete is not None:
+        st.session_state.queries.pop(to_delete)
+        st.rerun()
+    
+    user_input = st.text_input("Add a query to your list:", key="new_query")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Add Query"):
+            if user_input.strip():
+                st.session_state.queries.append(user_input)
+                st.success("Query added successfully!")
+                st.rerun()
+            else:
+                st.warning("Please enter a query first.")
+    with col2:
+        if st.button("Submit Queries"):
+            st.rerun()
+
+        
 
 st.sidebar.title("Pages")
-st.sidebar.button("Home 🏠")
-st.sidebar.button("My Querries 📋")
-st.sidebar.button("Analytics 📊")
+#Option 1
+if st.sidebar.button("My Querries 📋"):
+    my_queries_dialog()
 
+#Option 2
+if st.sidebar.button("Analytics 📊"):
+    st.warning("Analytics page is under development. Stay tuned!")
+
+#Option 3
+if st.sidebar.button("Info ℹ️"):
+    info_dialog()
+
+#-- FILTERS ----------
+st.sidebar.title("Filters")
 st.sidebar.selectbox("Sort by status", 
     options=["All", "New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", 
              "Rejected", "Offered", "Accepted", "Declined"],
     key="sort_status"
 )
 
+## IMPLEMENT COMPANY FILTER LATER
+st.sidebar.selectbox("Filter by company", 
+    options=["All", "Company A", "Company B", "Company C"],
+    key="filter_company"
+)
+
+
+
+# ---------- APP ----------
+st.title("Job bank App 📋")
+
+with st.container(horizontal=True):
+    st.write("This app helps you find job listings.")
+    st.button("Refresh 🎲")
 
 
 def display_job_card(job_instance):
@@ -63,104 +166,105 @@ def display_job_card(job_instance):
 
 total_items = 100
 items_per_row = 2
-with st.status("Fetching latest job listings..."):
-    for row in range(0, total_items, items_per_row):
-        cols = st.columns(2)
-        
-        for i, col in enumerate(cols):
-            item_num = row + i + 1
-            if item_num <= total_items:
-                with col:
-                    if item_num % 10 == 1:
-                        display_job_card(job(
-                        id=item_num,
-                        title=f"Job Title {item_num}",
-                        company=f"Company {item_num}",
-                        location=f"Location {item_num}",
-                        link=f"http://example.com/job{item_num}",
-                        status=status.NEW_NOT_VIEWED
-                    ))
-                    elif item_num % 10 == 2:
-                        display_job_card(job(
-                        id=item_num,
-                        title=f"Job Title {item_num}",
-                        company=f"Company {item_num}",
-                        location=f"Location {item_num}",
-                        link=f"http://example.com/job{item_num}",
-                        status=status.NEW_VIEWED
-                    ))
-                    elif item_num % 10 == 3:
-                        display_job_card(job(
-                        id=item_num,
-                        title=f"Job Title {item_num}",
-                        company=f"Company {item_num}",
-                        location=f"Location {item_num}",
-                        link=f"http://example.com/job{item_num}",
-                        status=status.APPLIED
-                    ))
-                    elif item_num % 10 == 4:
-                        display_job_card(job(
-                        id=item_num,
-                        title=f"Job Title {item_num}",
-                        company=f"Company {item_num}",
-                        location=f"Location {item_num}",
-                        link=f"http://example.com/job{item_num}",
-                        status=status.UNDER_REVIEW
-                    ))
-                    elif item_num % 10 == 5:
-                        display_job_card(job(
-                        id=item_num,
-                        title=f"Job Title {item_num}",
-                        company=f"Company {item_num}",
-                        location=f"Location {item_num}",
-                        link=f"http://example.com/job{item_num}",
-                        status=status.INTERVIEW_SCHEDULED
-                    ))
-                    elif item_num % 10 == 6:
-                        display_job_card(job(
-                        id=item_num,
-                        title=f"Job Title {item_num}",
-                        company=f"Company {item_num}",
-                        location=f"Location {item_num}",
-                        link=f"http://example.com/job{item_num}",
-                        status=status.SHORTLISTED
-                    ))
-                    elif item_num % 10 == 7:
-                        display_job_card(job(
-                        id=item_num,
-                        title=f"Job Title {item_num}",
-                        company=f"Company {item_num}",
-                        location=f"Location {item_num}",
-                        link=f"http://example.com/job{item_num}",
-                        status=status.REJECTED
-                    ))
-                    elif item_num % 10 == 8:
-                        display_job_card(job(
-                        id=item_num,
-                        title=f"Job Title {item_num}",
-                        company=f"Company {item_num}",
-                        location=f"Location {item_num}",
-                        link=f"http://example.com/job{item_num}",
-                        status=status.OFFERED
-                    ))
-                    elif item_num % 10 == 9:
-                        display_job_card(job(
-                        id=item_num,
-                        title=f"Job Title {item_num}",
-                        company=f"Company {item_num}",
-                        location=f"Location {item_num}",
-                        link=f"http://example.com/job{item_num}",
-                        status=status.ACCEPTED
-                    ))
-                    else:
-                        display_job_card(job(
-                        id=item_num,
-                        title=f"Job Title {item_num}",
-                        company=f"Company {item_num}",
-                        location=f"Location {item_num}",
-                        link=f"http://example.com/job{item_num}",
-                        status=status.DECLINED
-                    ))
+for query_idx, query in enumerate(st.session_state.get('queries', ["Computer Engineering - Canada - internship"])):
+    with st.status("Querying jobs for: " + query):
+        for row in range(0, total_items, items_per_row):
+            cols = st.columns(2)
+            
+            for i, col in enumerate(cols):
+                item_num = row + i + 1
+                if item_num <= total_items:
+                    with col:
+                        if item_num % 10 == 1:
+                            display_job_card(job(
+                            id=f"{query_idx}_{item_num}",
+                            title=f"Job Title {item_num}",
+                            company=f"Company {item_num}",
+                            location=f"Location {item_num}",
+                            link=f"http://example.com/job{item_num}",
+                            status=status.NEW_NOT_VIEWED
+                        ))
+                        elif item_num % 10 == 2:
+                            display_job_card(job(
+                            id=f"{query_idx}_{item_num}",
+                            title=f"Job Title {item_num}",
+                            company=f"Company {item_num}",
+                            location=f"Location {item_num}",
+                            link=f"http://example.com/job{item_num}",
+                            status=status.NEW_VIEWED
+                        ))
+                        elif item_num % 10 == 3:
+                            display_job_card(job(
+                            id=f"{query_idx}_{item_num}",
+                            title=f"Job Title {item_num}",
+                            company=f"Company {item_num}",
+                            location=f"Location {item_num}",
+                            link=f"http://example.com/job{item_num}",
+                            status=status.APPLIED
+                        ))
+                        elif item_num % 10 == 4:
+                            display_job_card(job(
+                            id=f"{query_idx}_{item_num}",
+                            title=f"Job Title {item_num}",
+                            company=f"Company {item_num}",
+                            location=f"Location {item_num}",
+                            link=f"http://example.com/job{item_num}",
+                            status=status.UNDER_REVIEW
+                        ))
+                        elif item_num % 10 == 5:
+                            display_job_card(job(
+                            id=f"{query_idx}_{item_num}",
+                            title=f"Job Title {item_num}",
+                            company=f"Company {item_num}",
+                            location=f"Location {item_num}",
+                            link=f"http://example.com/job{item_num}",
+                            status=status.INTERVIEW_SCHEDULED
+                        ))
+                        elif item_num % 10 == 6:
+                            display_job_card(job(
+                            id=f"{query_idx}_{item_num}",
+                            title=f"Job Title {item_num}",
+                            company=f"Company {item_num}",
+                            location=f"Location {item_num}",
+                            link=f"http://example.com/job{item_num}",
+                            status=status.SHORTLISTED
+                        ))
+                        elif item_num % 10 == 7:
+                            display_job_card(job(
+                            id=f"{query_idx}_{item_num}",
+                            title=f"Job Title {item_num}",
+                            company=f"Company {item_num}",
+                            location=f"Location {item_num}",
+                            link=f"http://example.com/job{item_num}",
+                            status=status.REJECTED
+                        ))
+                        elif item_num % 10 == 8:
+                            display_job_card(job(
+                            id=f"{query_idx}_{item_num}",
+                            title=f"Job Title {item_num}",
+                            company=f"Company {item_num}",
+                            location=f"Location {item_num}",
+                            link=f"http://example.com/job{item_num}",
+                            status=status.OFFERED
+                        ))
+                        elif item_num % 10 == 9:
+                            display_job_card(job(
+                            id=f"{query_idx}_{item_num}",
+                            title=f"Job Title {item_num}",
+                            company=f"Company {item_num}",
+                            location=f"Location {item_num}",
+                            link=f"http://example.com/job{item_num}",
+                            status=status.ACCEPTED
+                        ))
+                        else:
+                            display_job_card(job(
+                            id=f"{query_idx}_{item_num}",
+                            title=f"Job Title {item_num}",
+                            company=f"Company {item_num}",
+                            location=f"Location {item_num}",
+                            link=f"http://example.com/job{item_num}",
+                            status=status.DECLINED
+                        ))
 
 
 
