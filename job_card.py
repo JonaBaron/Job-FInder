@@ -1,6 +1,9 @@
 import streamlit as st
 from job import job, status
 
+
+
+
 def new_not_viewed(job_instance):
     with st.container(border=True):
         st.write(job_instance.get_title())
@@ -14,9 +17,14 @@ def new_not_viewed(job_instance):
         )
         
         flex = st.container(horizontal=True)
-        flex.button("Apply Now", key=f"apply_{job_instance.id}")
-        flex.button("View Details", key=f"view_{job_instance.id}")   
-    
+        flex.link_button("Link", job_instance.get_WEBLink())
+        flex.button("View Details", key=f"details_{job_instance.id}")
+        flex.selectbox("Change of Status", 
+            options=["New - Not Viewed"],
+            key=f"status_{job_instance.id}",
+            index=status.NEW_NOT_VIEWED - 1
+        )   
+
 def new_viewed(job_instance):
     with st.container(border=True):
         st.write(job_instance.get_title())
@@ -30,8 +38,13 @@ def new_viewed(job_instance):
         )
         
         flex = st.container(horizontal=True)
-        flex.button("Apply Now", key=f"apply_{job_instance.id}")
-        flex.button("View Details", key=f"view_{job_instance.id}")
+        flex.link_button("Link", job_instance.get_WEBLink())
+        flex.button("View Details", key=f"details_{job_instance.id}")
+        flex.selectbox("Change of Status", 
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
+            key=f"status_{job_instance.id}",
+            index=status.NEW_VIEWED - 1
+        )
 
 def applied(job_instance):
     with st.container(border=True):
@@ -45,8 +58,13 @@ def applied(job_instance):
         )
         
         flex = st.container(horizontal=True)
-        flex.button("View Application Status", key=f"status_{job_instance.id}")
-        flex.button("View Details", key=f"view_{job_instance.id}")
+        flex.link_button("Link", job_instance.get_WEBLink())
+        flex.button("View Details", key=f"details_{job_instance.id}")
+        flex.selectbox("Change of Status", 
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
+            key=f"status_{job_instance.id}",
+            index=status.APPLIED - 1
+        )
 
 def under_review(job_instance):
     with st.container(border=True):
@@ -60,8 +78,13 @@ def under_review(job_instance):
         )
         
         flex = st.container(horizontal=True)
-        flex.button("View Application Status", key=f"status_{job_instance.id}")
-        flex.button("View Details", key=f"view_{job_instance.id}")
+        flex.link_button("Link", job_instance.get_WEBLink())
+        flex.button("View Details", key=f"details_{job_instance.id}")
+        flex.selectbox("Change of Status", 
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
+            key=f"status_{job_instance.id}",
+            index=status.UNDER_REVIEW - 1
+        )
 
 def interview_scheduled(job_instance):
     with st.container(border=True):
@@ -75,8 +98,13 @@ def interview_scheduled(job_instance):
         )
         
         flex = st.container(horizontal=True)
-        flex.button("View Interview Details", key=f"interview_{job_instance.id}")
-        flex.button("View Details", key=f"view_{job_instance.id}")
+        flex.link_button("Link", job_instance.get_WEBLink())
+        flex.button("View Details", key=f"details_{job_instance.id}")
+        flex.selectbox("Change of Status", 
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
+            key=f"status_{job_instance.id}",
+            index=status.INTERVIEW_SCHEDULED - 1
+        )
 
 def shortlisted(job_instance):
     with st.container(border=True):
@@ -90,8 +118,13 @@ def shortlisted(job_instance):
         )
         
         flex = st.container(horizontal=True)
-        flex.button("View Application Status", key=f"status_{job_instance.id}")
-        flex.button("View Details", key=f"view_{job_instance.id}")
+        flex.link_button("Link", job_instance.get_WEBLink())
+        flex.button("View Details", key=f"details_{job_instance.id}")
+        flex.selectbox("Change of Status", 
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
+            key=f"status_{job_instance.id}",
+            index=status.SHORTLISTED - 1
+        )
 
 
 def rejected(job_instance):
@@ -106,8 +139,13 @@ def rejected(job_instance):
         )
         
         flex = st.container(horizontal=True)
-        flex.button("View Feedback", key=f"feedback_{job_instance.id}")
-        flex.button("View Details", key=f"view_{job_instance.id}")
+        flex.link_button("Link", job_instance.get_WEBLink())
+        flex.button("View Details", key=f"details_{job_instance.id}")
+        flex.selectbox("Change of Status", 
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
+            key=f"status_{job_instance.id}",
+            index=status.REJECTED - 1
+        )
 
 def offered(job_instance):
     with st.container(border=True):
@@ -121,8 +159,13 @@ def offered(job_instance):
         )
         
         flex = st.container(horizontal=True)
-        flex.button("View Offer Details", key=f"offer_{job_instance.id}")
-        flex.button("View Details", key=f"view_{job_instance.id}")
+        flex.link_button("Link", job_instance.get_WEBLink())
+        flex.button("View Details", key=f"details_{job_instance.id}")
+        flex.selectbox("Change of Status", 
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
+            key=f"status_{job_instance.id}",
+            index=status.OFFERED - 1
+        )        
 
 def accepted(job_instance):
     with st.container(border=True):
@@ -136,19 +179,30 @@ def accepted(job_instance):
         )
         
         flex = st.container(horizontal=True)
-        flex.button("View Onboarding Details", key=f"onboard_{job_instance.id}")
-        flex.button("View Details", key=f"view_{job_instance.id}")
+        flex.link_button("Link", job_instance.get_WEBLink())
+        flex.button("View Details", key=f"details_{job_instance.id}")
+        flex.selectbox("Change of Status", 
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
+            key=f"status_{job_instance.id}",
+            index=status.ACCEPTED - 1
+        )
+                    
 
 def declined(job_instance):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
         
-        # Grey pill badge for declined
         st.markdown(
             '<span style="background-color: #9E9E9E; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">declined</span>',
             unsafe_allow_html=True
         )
         
         flex = st.container(horizontal=True)
-        flex.button("View Details", key=f"view_{job_instance.id}")
+        flex.link_button("Link", job_instance.get_WEBLink())
+        flex.button("View Details", key=f"details_{job_instance.id}")  
+        flex.selectbox("Change of Status", 
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
+            key=f"status_{job_instance.id}",
+            index= status.DECLINED - 1
+        )
