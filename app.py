@@ -43,17 +43,12 @@ def info_dialog():
         st.link_button("Webpage", icon=":material/web:", url="https://jonabaron.github.io/")
    
 
-
-
-
-
 #Option 2 dialog
 @st.dialog("My Queries 📋")
 def my_queries_dialog():
     if 'queries' not in st.session_state:
         st.session_state.queries = load_queries()
     
-    # Track which query to delete (if any)
     to_delete = None
     
     for i, q in enumerate(st.session_state.queries):
@@ -63,11 +58,10 @@ def my_queries_dialog():
                 f"Query {i+1}", value=q, key=f"prev_query_{id(q)}_{i}"
             )
         with col_btn:
-            st.write("")  # Spacing to align with input
+            st.write("") 
             if st.button("", icon=":material/delete:", key=f"delete_{id(q)}_{i}"):
                 to_delete = i
     
-    # Delete after the loop to avoid index shifting mid-iteration
     if to_delete is not None:
         st.session_state.queries.pop(to_delete)
         st.rerun()
