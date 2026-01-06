@@ -113,5 +113,10 @@ for query_idx, query in enumerate(state.queries):
                 item_num = row + i
                 if item_num < total_items:
                     with col:
-                        display_job_card(filtered_jobs[item_num])
+                        display_job = filtered_jobs[item_num]
+                        display_job_card(display_job)
+                        st.write(display_job.status)
+                        # small animation
+                        if display_job.status == status.ACCEPTED or display_job.status == status.OFFERED:
+                            st.balloons()
 
