@@ -28,8 +28,8 @@ if st.session_state.get('connected', False):
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.image(user_info.get('picture', ''), width=100)
-    
+        st.image(user_info.get('picture', 'User'), width=100)
+        
     with col2:
         st.write(f"**Name:** {user_info.get('name', 'N/A')}")
         st.write(f"**Email:** {user_info.get('email', 'N/A')}")

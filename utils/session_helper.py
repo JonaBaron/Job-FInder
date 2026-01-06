@@ -23,7 +23,7 @@ def initialize_session_state():
         st.session_state.num_of_jobs_to_find = 25
     # Jobs per default
     if 'jobs' not in st.session_state:
-        st.session_state.jobs = []
+        st.session_state.jobs = [[] for _ in range(len(st.session_state.queries))]
     # List of compagnies
     if 'companies' not in st.session_state:    
         st.session_state.companies = []

@@ -28,7 +28,6 @@ def info_dialog():
         st.link_button("LinkedIn", icon=":material/work:", url="https://www.linkedin.com/in/jonathan-mehmannavaz/")
         st.link_button("Webpage", icon=":material/web:", url="https://jonabaron.github.io/")
    
-#My Queries dialog
 @st.dialog("My Queries 📋")
 def my_queries_dialog():
     
@@ -47,6 +46,7 @@ def my_queries_dialog():
     
     if to_delete is not None:
         st.session_state.queries.pop(to_delete)
+        st.session_state.jobs.pop(to_delete)  # Also remove corresponding jobs!
         st.rerun()
     
     user_input = st.text_input("Add a query to your list:", key="new_query")
@@ -56,6 +56,7 @@ def my_queries_dialog():
         if st.button("Add Query"):
             if user_input.strip():
                 st.session_state.queries.append(user_input)
+                st.session_state.jobs.append([])  # Add empty jobs list for new query
                 st.success("Query added successfully!")
                 st.rerun()
             else:

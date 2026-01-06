@@ -5,7 +5,7 @@ from utils.job_finder import *
 import os
 from dotenv import load_dotenv
 from components.dialog import *
-from utils.session import *
+from utils.session_helper import *
 from natsort import natsorted
 
 ## to implement later
@@ -29,7 +29,7 @@ if state is None:
 
 #-- SIDEBAR ----------
 # Dialog buttons menu
-st.sidebar.title("Pages")
+st.sidebar.title("Menu")
 
 # Queries dialog
 if st.sidebar.button("My Querries 📋"):
@@ -64,12 +64,15 @@ st.sidebar.selectbox("Filter by company",
 )
 
 
-
 # Number of Jobs
-st.sidebar.number_input("Number of jobs to find", min_value=1, max_value=250, value=25, step=1, key="num_of_jobs_to_find")
+state.num_of_jobs_to_find = st.sidebar.number_input("Number of jobs to find", min_value=1, max_value=250, value=25, step=1)
 
-## Job per line
-st.sidebar.number_input("Jobs per line", min_value=1, max_value=3, value=2, step=1, key="items_per_row")
+# Job per line
+state.items_per_row = st.sidebar.number_input("Jobs per line", min_value=1, max_value=6, value=2, step=1)
+
+#Button to log out
+if st.sidebar.button("Logout", icon=":material/logout:"):
+    st.sidebar.write("adsfdf")
 
 # ---------- Main page ----------
 
@@ -84,21 +87,32 @@ with st.container(horizontal=True):
 items_per_row = state.items_per_row
 
 for query_idx, query in enumerate(state.queries):
-    with st.status("Querying jobs for: " + query):
-        # Find jobs to a querry
-        state.jobs = dummy_find_jobs(query_idx)
+    with st.expander("Querying jobs for: " + query):
         
-        # List and sort the company names
-        state.companies = natsorted({job.get_company() for job in state.jobs})
+        # Ensure jobs list is long enough for this query index
+        while len(state.jobs) <= query_idx:
+            state.jobs.append([])
+        
+        # Check if THIS query's jobs are empty
+        if state.jobs[query_idx] == []:
+            st.toast("refresh")
+            state.jobs[query_idx] = find_jobs(query,1,query_idx)
+        else:
+            st.toast("no refresh")
+        
+        # Get jobs for THIS query
+        query_jobs = state.jobs[query_idx]
+        
+        # List and sort the company names (from this query's jobs)
+        state.companies = natsorted({job.get_company() for job in query_jobs})
    
-        # Sort by compagny
+        # Sort by company
         company_target = state.get("target_company", "All")
         if company_target == "All":
-            filtered_jobs = state.jobs
+            filtered_jobs = query_jobs
         else:
-            filtered_jobs = [job for job in state.jobs if job.get_company() == company_target]
-
-
+            filtered_jobs = [job for job in query_jobs if job.get_company() == company_target]
+        
         # Sort by status
         sort_status = state.get("sort_status", "All")
         if sort_status == "All":
@@ -107,7 +121,7 @@ for query_idx, query in enumerate(state.queries):
             target_status = status.get_status_num(sort_status)
             filtered_jobs = [job for job in filtered_jobs if job.get_status() == target_status]
             if not filtered_jobs: 
-                st.warning("No job found with your critearia")
+                st.warning("No job found with your criteria")
  
         total_items = min(state.num_of_jobs_to_find, len(filtered_jobs))
         
@@ -120,8 +134,7 @@ for query_idx, query in enumerate(state.queries):
                 if item_num < total_items:
                     with col:
                         display_job = filtered_jobs[item_num]
-                        display_job_card(display_job)
-                        # small animation
+                        display_job_card(display_job) 
                         if display_job.status == status.ACCEPTED or display_job.status == status.OFFERED:
                             st.balloons()
 

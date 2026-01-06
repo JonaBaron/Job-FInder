@@ -87,7 +87,7 @@ def find_jobs_test():
     }
 
     params = {
-        "query": "Electrical Engineering - Canada - internship",
+        "query": "Montreal",
         "num_pages": 2
     }
 
@@ -106,7 +106,7 @@ def find_jobs_test():
 
 
 # Main function to find jobs and return list of job instances
-def find_jobs(query="Computer Engineering - Canada - internship", num_pages=2):
+def find_jobs(query="Computer Engineering - Canada - internship", num_pages=2,query_idx=0):
 
     api_key_name, api_key_value , url = load_api_keys()
 
@@ -122,16 +122,23 @@ def find_jobs(query="Computer Engineering - Canada - internship", num_pages=2):
     response = requests.get(url, headers=headers, params=params)
     data = response.json()
 
+    for job_data in data.get('data', []):  # Changed from 'job' to 'job_data'
+        print(f"Title: {job_data.get('job_title')}")
+        print(f"Company: {job_data.get('employer_name')}")
+        print(f"Location: {job_data.get('job_city')}, {job_data.get('job_state')}")
+        print(f"Link: {job_data.get('job_apply_link')}")
+        print('-' * 50)
+
     return [
         job(
-            id=i,
+            id=f"{query_idx}_{i}",
             title=job_data.get('job_title'),
             company=job_data.get('employer_name'),
             location=f"{job_data.get('job_city')}, {job_data.get('job_state')}",
             link=job_data.get('job_apply_link'),
             status=status.NEW_NOT_VIEWED
         )
-        for i, job_data in enumerate(response.json().get('data', []), start=1)
+        for i, job_data in enumerate(data.get('data', []), start=1)
     ]
 
 if __name__ == "__main__":
