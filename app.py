@@ -1,10 +1,15 @@
+from time import sleep
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 from auth import get_authenticator, check_auth, logout
+from job_card import *
+from job_finder import fake_jobs
+from job import *
+import random
 
 st.set_page_config(
     page_title="Job Bank - Login",
-    page_icon="🔐",
-    layout="centered"
+    page_icon="🔐"
 )
 
 # Initialize authenticator and check auth status
@@ -31,7 +36,7 @@ if st.session_state.get('connected', False):
     
     # Navigation to main app
     if st.button("🚀 Go to Job Board", type="primary", use_container_width=True):
-        st.switch_page("pages/1_job_board.py")
+        st.switch_page("job_board.py")
     
     st.divider()
     
@@ -41,14 +46,15 @@ if st.session_state.get('connected', False):
 
 # --- NOT LOGGED IN ---
 else:
-    st.title("Job Bank App 📋")
-    st.write("Welcome! Please sign in to continue.")
-    
-    st.divider()
-    
-    # Centered login button
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
+
+    col1, col2 = st.columns(2, vertical_alignment="center", gap="large")
+    with col1:
+        st.title("Job Bank App 📋")
+        st.write("Welcome! Please sign in to continue.")
+        
+        st.divider()
+        
+        
         authorization_url = authenticator.get_authorization_url()
         st.link_button(
             "🔐 Sign in with Google", 
@@ -56,7 +62,18 @@ else:
             use_container_width=True,
             type="primary"
         )
+        
+        st.divider()
+        
+        st.info("ℹ️ This app helps you find and track job listings. Sign in to get started!")
     
-    st.divider()
-    
-    st.info("ℹ️ This app helps you find and track job listings. Sign in to get started!")
+    with col2:
+        # Create a placeholder that can be updated
+        job_placeholder = st.empty()
+        
+        # Use a container inside the placeholder
+        with job_placeholder.container():
+            display_job_card(random.choice(fake_jobs))
+        
+        # Auto-refresh every 4 seconds
+        st_autorefresh(interval=4000, key="job_refresh")

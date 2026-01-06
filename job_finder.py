@@ -39,6 +39,42 @@ def dummy_find_jobs(query_idx=0, total_items=100):
         for i in range(1, total_items + 1)
     ]
 
+#hard coded jobs
+fake_jobs = [
+    # Tech
+    job(id=1, title="Senior Software Engineer", company="TechNova Solutions", location="San Francisco, CA", link="http://example.com/job1", status=status.NEW_NOT_VIEWED),
+    job(id=2, title="Data Scientist", company="DataMind Analytics", location="Austin, TX", link="", status=status.APPLIED),
+    
+    # Healthcare
+    job(id=3, title="Registered Nurse", company="Sunrise Medical Center", location="Boston, MA", link="", status=status.UNDER_REVIEW),
+    job(id=4, title="Physical Therapist", company="ActiveLife Rehabilitation", location="Denver, CO", link="", status=status.NEW_VIEWED),
+    job(id=5, title="Pharmacy Technician", company="MedPlus Pharmacy", location="Chicago, IL", link="", status=status.OFFERED),
+    
+    # Food & Hospitality
+    job(id=6, title="Executive Chef", company="Golden Fork Restaurant", location="New York, NY", link="", status=status.REJECTED),
+    job(id=7, title="Hotel Manager", company="Oceanview Resort", location="Miami, FL", link="", status=status.INTERVIEW_SCHEDULED),
+    job(id=8, title="Barista", company="Bean & Brew Coffee", location="Seattle, WA", link="", status=status.NEW_NOT_VIEWED),
+    
+    # Education
+    job(id=9, title="High School Math Teacher", company="Westbrook Academy", location="Portland, OR", link="", status=status.OFFERED),
+    job(id=10, title="University Professor", company="Lakefield University", location="Toronto, ON", link="", status=status.NEW_NOT_VIEWED),
+    job(id=11, title="School Counselor", company="Maplewood Elementary", location="Vancouver, BC", link="", status=status.SHORTLISTED),
+    
+    # Construction & Trades
+    job(id=12, title="Electrician", company="BrightSpark Electric", location="Phoenix, AZ", link="", status=status.UNDER_REVIEW),
+    job(id=13, title="Plumber", company="FlowRight Plumbing", location="Houston, TX", link="", status=status.ACCEPTED),
+    job(id=14, title="Construction Manager", company="BuildWell Inc.", location="Atlanta, GA", link="", status=status.OFFERED),
+    
+    # Arts & Entertainment
+    job(id=15, title="Graphic Designer", company="Creative Spark Studio", location="Los Angeles, CA", link="", status=status.DECLINED),
+    job(id=16, title="Video Editor", company="Visionary Films", location="Nashville, TN", link="", status=status.REJECTED),
+    job(id=17, title="Museum Curator", company="Heritage Art Museum", location="Washington, DC", link="", status=status.SHORTLISTED),
+    
+    # Finance & Business
+    job(id=18, title="Financial Analyst", company="Summit Capital Group", location="Charlotte, NC", link="", status=status.NEW_NOT_VIEWED),
+    job(id=19, title="Accountant", company="TrustLedger Accounting", location="Dallas, TX", link="", status=status.NEW_NOT_VIEWED),
+    job(id=20, title="Marketing Manager", company="BrandBoost Agency", location="Montreal, QC", link="", status=status.UNDER_REVIEW),
+]
 
 
 # Test function to demonstrate job finding
