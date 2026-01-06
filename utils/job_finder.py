@@ -1,7 +1,7 @@
 import requests
 import os
 from dotenv import load_dotenv
-from job import job, status
+from models.job import job, status
 
 # Import function to load API keys
 def load_api_keys():

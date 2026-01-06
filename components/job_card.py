@@ -1,5 +1,5 @@
 import streamlit as st
-from job import job, status
+from models.job import job, status
 
 
 def display_job_card(job_instance):

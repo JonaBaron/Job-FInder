@@ -1,10 +1,10 @@
 from time import sleep
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
-from auth import get_authenticator, check_auth, logout
-from job_card import *
-from job_finder import fake_jobs
-from job import *
+from utils.auth import get_authenticator, check_auth, logout
+from components.job_card import *
+from utils.job_finder import fake_jobs
+from models.job import *
 import random
 
 st.set_page_config(

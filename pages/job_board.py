@@ -1,11 +1,11 @@
 import streamlit as st
-from job import *
-from job_card import *
-from job_finder import *
+from models.job import *
+from components.job_card import *
+from utils.job_finder import *
 import os
 from dotenv import load_dotenv
-from dialog import *
-from session import *
+from pages.dialog import *
+from utils.session import *
 from natsort import natsorted
 
 ## to implement later

@@ -1,5 +1,5 @@
 from sqlite3 import Connection, connect
-from job import job, status
+from models.job import job, status
 DB_NAME = "jobs.db"
 def get_db_connection() -> Connection:
     conn = connect(DB_NAME)
