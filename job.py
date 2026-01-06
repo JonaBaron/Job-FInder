@@ -58,4 +58,19 @@ class status:
     # 10. Declined Job
     DECLINED = 10
 
+    def get_status_num(status_str):
+        status_dict = {
+            "New - Not Viewed": status.NEW_NOT_VIEWED,
+            "New - Viewed": status.NEW_VIEWED,
+            "Applied": status.APPLIED,
+            "Under Review": status.UNDER_REVIEW,
+            "Interview Scheduled": status.INTERVIEW_SCHEDULED,
+            "Shortlisted": status.SHORTLISTED,
+            "Rejected": status.REJECTED,
+            "Offered": status.OFFERED,
+            "Accepted": status.ACCEPTED,
+            "Declined": status.DECLINED
+        }
+        return status_dict.get(status_str, None)
+
 
