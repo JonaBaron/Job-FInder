@@ -13,6 +13,12 @@ from natsort import natsorted
 # csv
 # balloons: st.balloons()
 
+st.set_page_config(
+    page_title="Job Bank",
+    page_icon="📋",
+    layout= "wide"
+)
+
 #--session state initialization --
 
 state = initialize_session_state()
@@ -115,7 +121,6 @@ for query_idx, query in enumerate(state.queries):
                     with col:
                         display_job = filtered_jobs[item_num]
                         display_job_card(display_job)
-                        st.write(display_job.status)
                         # small animation
                         if display_job.status == status.ACCEPTED or display_job.status == status.OFFERED:
                             st.balloons()

@@ -9,7 +9,8 @@ import random
 
 st.set_page_config(
     page_title="Job Bank - Login",
-    page_icon="🔐"
+    page_icon="🔐",
+    layout= "wide"
 )
 
 # Initialize authenticator and check auth status
