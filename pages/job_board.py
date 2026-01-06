@@ -4,7 +4,7 @@ from components.job_card import *
 from utils.job_finder import *
 import os
 from dotenv import load_dotenv
-from pages.dialog import *
+from components.dialog import *
 from utils.session import *
 from natsort import natsorted
 

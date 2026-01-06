@@ -10,7 +10,8 @@ import random
 st.set_page_config(
     page_title="Job Bank - Login",
     page_icon="🔐",
-    layout= "wide"
+    layout= "wide",
+    initial_sidebar_state="collapsed"
 )
 
 # Initialize authenticator and check auth status
@@ -37,7 +38,7 @@ if st.session_state.get('connected', False):
     
     # Navigation to main app
     if st.button("🚀 Go to Job Board", type="primary", use_container_width=True):
-        st.switch_page("job_board.py")
+        st.switch_page("pages/job_board.py")
     
     st.divider()
     
