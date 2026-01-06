@@ -11,11 +11,6 @@ from job_finder import find_jobs
 
 #-- SIDEBAR ----------
 
-# function to load querries to refine later
-def load_queries():
-    return ["Computer Engineering - Canada - internship", "Electrical Engineering - Canada - internship",
-             "Software Engineering - Canada - internship", "Data Science - Canada - internship"]
-
 #Option 1 dialog
 @st.dialog("Info ℹ️")
 def info_dialog():
@@ -43,11 +38,13 @@ def info_dialog():
         st.link_button("Webpage", icon=":material/web:", url="https://jonabaron.github.io/")
    
 
+st.session_state.queries = ["Computer Engineering - Canada - internship", "Electrical Engineering - Canada - internship",
+             "Software Engineering - Canada - internship", "Data Science - Canada - internship"]
+
+
 #Option 2 dialog
 @st.dialog("My Queries 📋")
 def my_queries_dialog():
-    if 'queries' not in st.session_state:
-        st.session_state.queries = load_queries()
     
     to_delete = None
     
@@ -81,7 +78,21 @@ def my_queries_dialog():
         if st.button("Submit Queries"):
             st.rerun()
 
-        
+#Option 3 dialog
+@st.dialog("Settings ⚙️")
+def settings_dialog():
+
+    st.write("## API Key Configuration")
+    st.write("### JSearch Key Configuration")
+    st.text_input("Enter your JSearch api name", placeholder="ex: x-api-key", key="Api_name")
+    st.text_input("Enter your JSearch api key", placeholder="ex: your_api_key_12345", key="Api_value")
+    st.write("You can get your API key from [here](https://www.openwebninja.com/jsearch).")
+
+    st.write("### MongoDB Key Configuration")
+    st.text_input("Enter your MongoDB api name", placeholder="ex: x-api-key", key="MongoDB_Api_name")
+    st.text_input("Enter your MongoDB api key", placeholder="ex: your_api_key_12345", key="MongoDB_Api_value")
+    st.write("You can get your API key from [here](https://www.mongodb.com/).")
+    
 
 st.sidebar.title("Pages")
 #Option 1
@@ -91,6 +102,11 @@ if st.sidebar.button("My Querries 📋"):
 #Option 2
 if st.sidebar.button("Analytics 📊"):
     st.warning("Analytics page is under development. Stay tuned!")
+
+if st.sidebar.button("Settings ⚙️"):
+    settings_dialog()
+
+
 
 #Option 3
 if st.sidebar.button("Info ℹ️"):
@@ -110,7 +126,9 @@ st.sidebar.selectbox("Filter by company",
     key="filter_company"
 )
 
-
+## Job per line
+st.session_state.jobs_per_line = 2
+st.session_state.jobs_per_line = st.sidebar.number_input("Jobs per line", min_value=1, max_value=3, value=2, step=1, key="jobs_number_per_line")
 
 # ---------- APP ----------
 st.title("Job bank App 📋")
@@ -159,11 +177,11 @@ def display_job_card(job_instance):
 # # 100 elements, 4 per row = 25 rows
 
 total_items = 100
-items_per_row = 2
+items_per_row = st.session_state.jobs_per_line
 for query_idx, query in enumerate(st.session_state.get('queries', ["Computer Engineering - Canada - internship"])):
     with st.status("Querying jobs for: " + query):
         for row in range(0, total_items, items_per_row):
-            cols = st.columns(2)
+            cols = st.columns(items_per_row)
             
             for i, col in enumerate(cols):
                 item_num = row + i + 1
