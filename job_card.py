@@ -2,7 +2,39 @@ import streamlit as st
 from job import job, status
 
 
+def display_job_card(job_instance):
 
+    type = job_instance.get_status()
+
+    if type == status.NEW_NOT_VIEWED:
+        new_not_viewed(job_instance)
+    
+    elif type == status.NEW_VIEWED:
+        new_viewed(job_instance)
+
+    elif type == status.APPLIED:
+        applied(job_instance)
+    
+    elif type == status.UNDER_REVIEW:
+        under_review(job_instance)
+    
+    elif type == status.INTERVIEW_SCHEDULED:
+        interview_scheduled(job_instance)
+
+    elif type == status.SHORTLISTED:
+        shortlisted(job_instance)
+
+    elif type == status.REJECTED:
+        rejected(job_instance)
+
+    elif type == status.OFFERED:
+        offered(job_instance)
+
+    elif type == status.ACCEPTED:
+        accepted(job_instance)
+
+    elif type == status.DECLINED:
+        declined(job_instance)
 
 def new_not_viewed(job_instance):
     with st.container(border=True):

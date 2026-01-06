@@ -11,6 +11,34 @@ def load_api_keys():
     url = "https://api.openwebninja.com/jsearch/search"
     return api_key_name, api_key_value , url
 
+# Dummy function to generate job data for testing
+def dummy_find_jobs(query_idx=0, total_items=100):
+    """Generate dummy job data with cycling statuses"""
+    status_map = {
+        1: status.NEW_NOT_VIEWED,
+        2: status.NEW_VIEWED,
+        3: status.APPLIED,
+        4: status.UNDER_REVIEW,
+        5: status.INTERVIEW_SCHEDULED,
+        6: status.SHORTLISTED,
+        7: status.REJECTED,
+        8: status.OFFERED,
+        9: status.ACCEPTED,
+        0: status.DECLINED,
+    }
+    
+    return [
+        job(
+            id=f"{query_idx}_{i}",
+            title=f"Job Title {i}",
+            company=f"Company {i}",
+            location=f"Location {i}",
+            link=f"http://example.com/job{i}",
+            status=status_map[i % 10]
+        )
+        for i in range(1, total_items + 1)
+    ]
+
 
 
 # Test function to demonstrate job finding
@@ -58,20 +86,17 @@ def find_jobs(query="Computer Engineering - Canada - internship", num_pages=2):
     response = requests.get(url, headers=headers, params=params)
     data = response.json()
 
-    jobs_list = []
-
-    for job_data in data.get('data', []):
-        job_instance = job(
-            id=jobs_list.__len__() + 1,
+    return [
+        job(
+            id=i,
             title=job_data.get('job_title'),
             company=job_data.get('employer_name'),
             location=f"{job_data.get('job_city')}, {job_data.get('job_state')}",
             link=job_data.get('job_apply_link'),
             status=status.NEW_NOT_VIEWED
         )
-        jobs_list.append(job_instance)
-
-    return jobs_list
+        for i, job_data in enumerate(response.json().get('data', []), start=1)
+    ]
 
 if __name__ == "__main__":
     find_jobs_test()
