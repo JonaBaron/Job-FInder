@@ -1,6 +1,6 @@
 import streamlit as st
 from models.job import job, status
-from utils.session_helper import get_value
+from utils.session_helper import get_value, delete_job
 import webbrowser
 
 
@@ -55,11 +55,14 @@ def new_not_viewed(job_instance):
             job_instance.set_status(status.NEW_VIEWED)
 
         flex = st.container(horizontal=True)
-        flex.button("Link", key=f"link_{job_instance.id}",on_click=update_status)       
-        flex.button("Details", key=f"details_{job_instance.id}") 
+        flex.button("Link", key=f"link_{job_instance.id}",on_click=update_status)
+        flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
+            delete_job(job_instance.id)
+            st.rerun()
 
-        st.selectbox("Change of Status", 
+        st.selectbox("Change of Status",
             options=["New - Not Viewed"],
             key=f"status_{job_instance.id}",
             index=status.NEW_NOT_VIEWED - 1
@@ -81,13 +84,16 @@ def new_viewed(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        
+        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
+            delete_job(job_instance.id)
+            st.rerun()
+
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
-        st.selectbox("Change of Status", 
+        st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
             key=f"status_{job_instance.id}",
             index=status.NEW_VIEWED - 1,
@@ -110,13 +116,16 @@ def applied(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
+            delete_job(job_instance.id)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
-    
-        st.selectbox("Change of Status", 
+
+        st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
             key=f"status_{job_instance.id}",
             index=status.APPLIED - 1,
@@ -138,13 +147,16 @@ def under_review(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
+            delete_job(job_instance.id)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
-        st.selectbox("Change of Status", 
+        st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
             key=f"status_{job_instance.id}",
             index=status.UNDER_REVIEW - 1,
@@ -166,17 +178,20 @@ def interview_scheduled(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
+            delete_job(job_instance.id)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
-        st.selectbox("Change of Status", 
+        st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
             key=f"status_{job_instance.id}",
             index=status.INTERVIEW_SCHEDULED - 1,
-            on_change= update_status
+            on_change=update_status
         )
 
 def shortlisted(job_instance):
@@ -194,17 +209,20 @@ def shortlisted(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
+            delete_job(job_instance.id)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
-        st.selectbox("Change of Status", 
+        st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
             key=f"status_{job_instance.id}",
             index=status.SHORTLISTED - 1,
-            on_change= update_status
+            on_change=update_status
         )
 
 
@@ -223,13 +241,16 @@ def rejected(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
+            delete_job(job_instance.id)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
-        st.selectbox("Change of Status", 
+        st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
             key=f"status_{job_instance.id}",
             index=status.REJECTED - 1,
@@ -251,18 +272,21 @@ def offered(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
+            delete_job(job_instance.id)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
-        st.selectbox("Change of Status", 
+        st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
             key=f"status_{job_instance.id}",
             index=status.OFFERED - 1,
-            on_change= update_status
-        )        
+            on_change=update_status
+        )
 
 
 def accepted(job_instance):
@@ -280,19 +304,22 @@ def accepted(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
+            delete_job(job_instance.id)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
-        st.selectbox("Change of Status", 
+        st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
             key=f"status_{job_instance.id}",
-            index=status.ACCEPTED - 1, 
-            on_change= update_status
+            index=status.ACCEPTED - 1,
+            on_change=update_status
         )
-                    
+
 
 def declined(job_instance):
     with st.container(border=True):
@@ -306,20 +333,23 @@ def declined(job_instance):
         
         flex = st.container(horizontal=True)
         flex.link_button("Link", job_instance.get_WEBLink())
-        flex.button("Details", key=f"details_{job_instance.id}")  
+        flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        
+        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
+            delete_job(job_instance.id)
+            st.rerun()
+
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
-        
+
         current_status_index = job_instance.get_status() - 1
-        
+
         st.selectbox(
-            "Change of Status", 
-            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", 
-                     "Interview Scheduled", "Shortlisted", "Rejected", "Offered", 
+            "Change of Status",
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review",
+                     "Interview Scheduled", "Shortlisted", "Rejected", "Offered",
                      "Accepted", "Declined"],
             key=f"status_{job_instance.id}",
             index=current_status_index,

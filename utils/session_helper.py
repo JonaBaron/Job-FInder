@@ -111,6 +111,13 @@ def get_companies():
 def set_companies(companies):
     set_value('companies', companies)
 
+def delete_job(job_id):
+    """Delete a job by its ID from all query lists."""
+    jobs = get_value('jobs')
+    for query_idx, query_jobs in enumerate(jobs):
+        jobs[query_idx] = [job for job in query_jobs if job.id != job_id]
+    set_value('jobs', jobs)
+
 # ============================================
 # AUTH HELPERS
 # ============================================
