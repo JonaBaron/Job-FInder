@@ -1,16 +1,11 @@
-from time import sleep
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh
-from utils.auth import get_authenticator, check_auth, logout
-from components.job_card import *
-from utils.job_finder import fake_jobs
-from models.job import *
-import random
+from utils.auth import get_authenticator
+from utils.session_helper import is_connected
 
 st.set_page_config(
-    page_title="Job Bank - Login",
-    page_icon="🔐",
-    layout= "wide",
+    page_title="Job Bank",
+    page_icon="💼",
+    layout="centered",
     initial_sidebar_state="collapsed"
 )
 
@@ -18,64 +13,42 @@ st.set_page_config(
 authenticator = get_authenticator()
 authenticator.check_authentification()
 
-# --- ALREADY LOGGED IN ---
-if st.session_state.get('connected', False):
-    user_info = st.session_state.get('user_info', {})
-    
-    st.title("Job Bank App 📋")
-    st.success(f"✅ Logged in as {user_info.get('name', 'User')}")
-    
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        st.image(user_info.get('picture', 'User'), width=100)
-        
-    with col2:
-        st.write(f"**Name:** {user_info.get('name', 'N/A')}")
-        st.write(f"**Email:** {user_info.get('email', 'N/A')}")
-    
-    st.divider()
-    
-    # Navigation to main app
-    if st.button("🚀 Go to Job Board", type="primary", use_container_width=True):
-        st.switch_page("pages/job_board.py")
-    
-    st.divider()
-    
-    if st.button("🚪 Logout", use_container_width=True):
-        logout()
-        st.rerun()
+# --- ALREADY LOGGED IN: Redirect to Job Board ---
+if is_connected():
+    st.switch_page("pages/job_board.py")
 
-# --- NOT LOGGED IN ---
-else:
+# --- NOT LOGGED IN: Simple Landing Page ---
 
-    col1, col2 = st.columns(2, vertical_alignment="center", gap="large")
-    with col1:
-        st.title("Job Bank App 📋")
-        st.write("Welcome! Please sign in to continue.")
-        
-        st.divider()
-        
-        
-        authorization_url = authenticator.get_authorization_url()
-        st.link_button(
-            "🔐 Sign in with Google", 
-            authorization_url,
-            use_container_width=True,
-            type="primary"
-        )
-        
-        st.divider()
-        
-        st.info("ℹ️ This app helps you find and track job listings. Sign in to get started!")
-    
-    with col2:
-        # Create a placeholder that can be updated
-        job_placeholder = st.empty()
-        
-        # Use a container inside the placeholder
-        with job_placeholder.container():
-            display_job_card(random.choice(fake_jobs))
-        
-        # Auto-refresh every 4 seconds
-        st_autorefresh(interval=4000, key="job_refresh")
+st.write("")
+st.write("")
+
+# Logo / Title
+st.markdown("## 💼 Job Bank")
+st.write("Track your job applications in one place.")
+
+st.write("")
+
+# Sign in card
+with st.container(border=True):
+    st.write("**Sign in to continue**")
+    st.write("")
+
+    authorization_url = authenticator.get_authorization_url()
+    st.link_button(
+        "Continue with Google",
+        authorization_url,
+        use_container_width=True,
+        type="primary",
+        icon=":material/login:"
+    )
+
+st.write("")
+st.write("")
+
+# Simple feature list
+st.caption("What you can do:")
+st.markdown("""
+- :material/search: Search jobs with custom queries
+- :material/track_changes: Track application status
+- :material/filter_list: Filter by company & status
+""")

@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_google_auth import Authenticate
 import os
 from dotenv import load_dotenv
+from utils.session_helper import is_connected
 
 load_dotenv()
 
@@ -18,7 +19,7 @@ def check_auth():
     """Check if user is authenticated. Returns True if logged in."""
     authenticator = get_authenticator()
     authenticator.check_authentification()
-    return st.session_state.get('connected', False)
+    return is_connected()
 
 def require_auth():
     """Require authentication to access page. Stops execution if not logged in."""
@@ -26,10 +27,6 @@ def require_auth():
         st.warning("⚠️ Please log in from the Home page to access this content.")
         st.switch_page("app.py")
         st.stop()
-
-def get_user_info():
-    """Get current user info."""
-    return st.session_state.get('user_info', {})
 
 def logout():
     """Log out the current user."""

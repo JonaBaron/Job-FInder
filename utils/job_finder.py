@@ -1,5 +1,6 @@
 import requests
 import os
+import uuid
 from dotenv import load_dotenv
 from models.job import job, status
 
@@ -29,7 +30,7 @@ def dummy_find_jobs(query_idx=0, total_items=100):
     
     return [
         job(
-            id=f"{query_idx}_{i}",
+            id=str(uuid.uuid4()),
             title=f"Job Title {i}",
             company=f"Company {i}",
             location=f"Location {i}",
@@ -131,14 +132,14 @@ def find_jobs(query="Computer Engineering - Canada - internship", num_pages=2,qu
 
     return [
         job(
-            id=f"{query_idx}_{i}",
+            id=str(uuid.uuid4()),
             title=job_data.get('job_title'),
             company=job_data.get('employer_name'),
             location=f"{job_data.get('job_city')}, {job_data.get('job_state')}",
             link=job_data.get('job_apply_link'),
             status=status.NEW_NOT_VIEWED
         )
-        for i, job_data in enumerate(data.get('data', []), start=1)
+        for job_data in data.get('data', [])
     ]
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import streamlit as st
 from models.job import job, status
+from utils.session_helper import get_value
 import webbrowser
 
 
@@ -82,7 +83,7 @@ def new_viewed(job_instance):
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
         
         def update_status():
-            new_status_str = st.session_state[f"status_{job_instance.id}"]
+            new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
@@ -111,7 +112,7 @@ def applied(job_instance):
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
 
         def update_status():
-            new_status_str = st.session_state[f"status_{job_instance.id}"]
+            new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
     
@@ -139,7 +140,7 @@ def under_review(job_instance):
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
 
         def update_status():
-            new_status_str = st.session_state[f"status_{job_instance.id}"]
+            new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
@@ -167,7 +168,7 @@ def interview_scheduled(job_instance):
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
 
         def update_status():
-            new_status_str = st.session_state[f"status_{job_instance.id}"]
+            new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
@@ -195,7 +196,7 @@ def shortlisted(job_instance):
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
 
         def update_status():
-            new_status_str = st.session_state[f"status_{job_instance.id}"]
+            new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
@@ -224,7 +225,7 @@ def rejected(job_instance):
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
 
         def update_status():
-            new_status_str = st.session_state[f"status_{job_instance.id}"]
+            new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
@@ -252,7 +253,7 @@ def offered(job_instance):
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
 
         def update_status():
-            new_status_str = st.session_state[f"status_{job_instance.id}"]
+            new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
@@ -281,7 +282,7 @@ def accepted(job_instance):
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
 
         def update_status():
-            new_status_str = st.session_state[f"status_{job_instance.id}"]
+            new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
 
@@ -309,7 +310,7 @@ def declined(job_instance):
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
         
         def update_status():
-            new_status_str = st.session_state[f"status_{job_instance.id}"]
+            new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
         

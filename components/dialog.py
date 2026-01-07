@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 from dotenv import load_dotenv
+from utils.session_helper import get_queries, set_queries, get_jobs, set_jobs, get_value
 
 #Info dialog
 @st.dialog("Info ℹ️")
@@ -30,33 +31,38 @@ def info_dialog():
    
 @st.dialog("My Queries 📋")
 def my_queries_dialog():
-    
+    queries = get_queries()
+    jobs = get_jobs()
     to_delete = None
-    
-    for i, q in enumerate(st.session_state.queries):
+
+    for i, q in enumerate(queries):
         col_input, col_btn = st.columns([5, 1])
         with col_input:
-            st.session_state.queries[i] = st.text_input(
+            queries[i] = st.text_input(
                 f"Query {i+1}", value=q, key=f"prev_query_{id(q)}_{i}"
             )
         with col_btn:
-            st.write("") 
+            st.write("")
             if st.button("", icon=":material/delete:", key=f"delete_{id(q)}_{i}"):
                 to_delete = i
-    
+
     if to_delete is not None:
-        st.session_state.queries.pop(to_delete)
-        st.session_state.jobs.pop(to_delete)  # Also remove corresponding jobs!
+        queries.pop(to_delete)
+        jobs.pop(to_delete)
+        set_queries(queries)
+        set_jobs(jobs)
         st.rerun()
-    
+
     user_input = st.text_input("Add a query to your list:", key="new_query")
-    
+
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Add Query"):
             if user_input.strip():
-                st.session_state.queries.append(user_input)
-                st.session_state.jobs.append([])  # Add empty jobs list for new query
+                queries.append(user_input)
+                jobs.append([])
+                set_queries(queries)
+                set_jobs(jobs)
                 st.success("Query added successfully!")
                 st.rerun()
             else:
@@ -68,20 +74,35 @@ def my_queries_dialog():
 #Settings dialog
 @st.dialog("Settings ⚙️")
 def settings_dialog():
-
     load_dotenv()
-    os.getenv("JSearch_API_name", st.session_state.get("Api_name", ""))
-    os.getenv("JSearch_API_value", st.session_state.get("Api_value", ""))
-    os.getenv("MongoDB_Api_name", st.session_state.get("MongoDB_Api_name", ""))
-    os.getenv("MongoDB_Api_value", st.session_state.get("MongoDB_Api_value", ""))
 
     st.write("## API Key Configuration")
     st.write("### JSearch Key Configuration")
-    st.text_input("Enter your JSearch api name", placeholder="ex: x-api-key", key="Api_name")
-    st.text_input("Enter your JSearch api key", placeholder="ex: your_api_key_12345", key="Api_value")
+    st.text_input(
+        "Enter your JSearch api name",
+        placeholder="ex: x-api-key",
+        value=get_value("JSearch_API_name", ""),
+        key="Api_name"
+    )
+    st.text_input(
+        "Enter your JSearch api key",
+        placeholder="ex: your_api_key_12345",
+        value=get_value("JSearch_API_value", ""),
+        key="Api_value"
+    )
     st.write("You can get your API key from [here](https://www.openwebninja.com/jsearch).")
 
     st.write("### MongoDB Key Configuration")
-    st.text_input("Enter your MongoDB api name", placeholder="ex: x-api-key", key="MongoDB_Api_name")
-    st.text_input("Enter your MongoDB api key", placeholder="ex: your_api_key_12345", key="MongoDB_Api_value")
+    st.text_input(
+        "Enter your MongoDB api name",
+        placeholder="ex: x-api-key",
+        value=get_value("MongoDB_Api_name", ""),
+        key="MongoDB_Api_name"
+    )
+    st.text_input(
+        "Enter your MongoDB api key",
+        placeholder="ex: your_api_key_12345",
+        value=get_value("MongoDB_Api_value", ""),
+        key="MongoDB_Api_value"
+    )
     st.write("You can get your API key from [here](https://www.mongodb.com/).")
