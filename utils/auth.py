@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit_google_auth import Authenticate
 import os
 from dotenv import load_dotenv
-from utils.session_helper import is_connected
+from utils.session_helper import is_connected, sync_user_to_db
 
 load_dotenv()
 
@@ -19,6 +19,11 @@ def check_auth():
     """Check if user is authenticated. Returns True if logged in."""
     authenticator = get_authenticator()
     authenticator.check_authentification()
+
+    # Sync user to MongoDB if connected
+    if is_connected():
+        sync_user_to_db()
+
     return is_connected()
 
 def require_auth():

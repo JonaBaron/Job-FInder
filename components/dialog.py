@@ -1,7 +1,10 @@
 import streamlit as st
 import os
 from dotenv import load_dotenv
-from utils.session_helper import get_queries, set_queries, get_jobs, set_jobs, get_value
+from utils.session_helper import (
+    get_queries, set_queries, get_jobs, set_jobs, get_value,
+    save_jsearch_api_to_db, save_mongo_uri_to_db, is_connected
+)
 
 #Info dialog
 @st.dialog("Info ℹ️")
@@ -78,31 +81,52 @@ def settings_dialog():
 
     st.write("## API Key Configuration")
     st.write("### JSearch Key Configuration")
-    st.text_input(
+    jsearch_api_name = st.text_input(
         "Enter your JSearch api name",
         placeholder="ex: x-api-key",
         value=get_value("JSearch_API_name", ""),
         key="Api_name"
     )
-    st.text_input(
+    jsearch_api_value = st.text_input(
         "Enter your JSearch api key",
         placeholder="ex: your_api_key_12345",
         value=get_value("JSearch_API_value", ""),
-        key="Api_value"
+        key="Api_value",
+        type="password"
     )
     st.write("You can get your API key from [here](https://www.openwebninja.com/jsearch).")
 
     st.write("### MongoDB Key Configuration")
-    st.text_input(
-        "Enter your MongoDB api name",
-        placeholder="ex: x-api-key",
-        value=get_value("MongoDB_Api_name", ""),
-        key="MongoDB_Api_name"
-    )
-    st.text_input(
-        "Enter your MongoDB api key",
-        placeholder="ex: your_api_key_12345",
+    mongo_uri = st.text_input(
+        "Enter your MongoDB URI",
+        placeholder="ex: mongodb+srv://user:pass@cluster.mongodb.net",
         value=get_value("MongoDB_Api_value", ""),
-        key="MongoDB_Api_value"
+        key="MongoDB_Api_value",
+        type="password"
     )
-    st.write("You can get your API key from [here](https://www.mongodb.com/).")
+    st.write("You can get your MongoDB URI from [here](https://www.mongodb.com/).")
+
+    st.divider()
+
+    if st.button("Save Settings", type="primary", use_container_width=True):
+        if not is_connected():
+            st.error("Please log in to save settings.")
+            return
+
+        saved = False
+        # Save JSearch API if provided
+        if jsearch_api_value:
+            api_name = jsearch_api_name if jsearch_api_name else "x-rapidapi-key"
+            if save_jsearch_api_to_db(jsearch_api_value, api_name):
+                saved = True
+
+        # Save MongoDB URI if provided
+        if mongo_uri:
+            if save_mongo_uri_to_db(mongo_uri):
+                saved = True
+
+        if saved:
+            st.success("Settings saved successfully!")
+            st.rerun()
+        else:
+            st.warning("No changes to save or save failed.")

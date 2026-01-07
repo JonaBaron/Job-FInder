@@ -119,17 +119,24 @@ st.divider()
 # ============================================
 items_per_row = state.items_per_row
 
+# Check if API is configured
+if not is_api_configured():
+    st.warning("Please configure your JSearch API key in Settings to search for jobs.")
+
 for query_idx, query in enumerate(state.queries):
     with st.expander(f"**{query}** - Job Results", expanded=True):
-        
+
         # Ensure jobs list is long enough for this query index
         while len(state.jobs) <= query_idx:
             state.jobs.append([])
-        
+
         # Load jobs if empty
         if state.jobs[query_idx] == []:
-            with st.spinner(f"Searching jobs for '{query}'..."):
-                state.jobs[query_idx] = find_jobs(query, 1, query_idx)
+            if not is_api_configured():
+                st.info("Configure your API key in Settings to load jobs.")
+            else:
+                with st.spinner(f"Searching jobs for '{query}'..."):
+                    state.jobs[query_idx] = find_jobs(query, 1, query_idx)
 
         # Get jobs for this query
         query_jobs = state.jobs[query_idx]

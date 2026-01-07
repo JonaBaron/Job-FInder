@@ -1,6 +1,15 @@
 import streamlit as st
-import os
-from dotenv import load_dotenv
+from utils.db_user import (
+    get_or_create_user,
+    get_user_by_email,
+    update_user_jsearch_api,
+    update_user_mongo_uri,
+    get_user_jsearch_api,
+    get_user_mongo_uri,
+    has_user_configured_api,
+    has_user_configured_mongo,
+    update_user_profile
+)
 
 # ============================================
 # DEFAULT VALUES
@@ -13,11 +22,10 @@ DEFAULTS = {
     # User queries
     'queries': ["Montreal"],
 
-    # API settings
+    # API settings (loaded from MongoDB per-user)
     'JSearch_API_name': "",
     'JSearch_API_value': "",
-    'MongoDB_Api_name': "",
-    'MongoDB_Api_value': "",
+    'MongoDB_Api_value': "",  # User's personal MongoDB URI for job storage
 
     # Display settings
     'items_per_row': 2,
@@ -44,12 +52,15 @@ def initialize_session_state():
     return st.session_state
 
 def set_api_keys_in_session():
-    """Load API keys from environment variables."""
-    load_dotenv()
-    set_value('JSearch_API_name', os.getenv("JSearch_API_name", ""))
-    set_value('JSearch_API_value', os.getenv("JSearch_API_value", ""))
-    set_value('MongoDB_Api_name', os.getenv("MongoDB_Api_name", ""))
-    set_value('MongoDB_Api_value', os.getenv("MongoDB_Api_value", ""))
+    """Initialize API key session values (loaded from DB on login)."""
+    # API keys are now per-user and loaded from MongoDB on login
+    # This just ensures the session keys exist with empty defaults
+    if 'JSearch_API_name' not in st.session_state:
+        set_value('JSearch_API_name', "")
+    if 'JSearch_API_value' not in st.session_state:
+        set_value('JSearch_API_value', "")
+    if 'MongoDB_Api_value' not in st.session_state:
+        set_value('MongoDB_Api_value', "")
 
 # ============================================
 # GETTERS & SETTERS
@@ -176,6 +187,105 @@ def reset_all():
     """Reset all session state to defaults."""
     for key, default in DEFAULTS.items():
         st.session_state[key] = default
+
+# ============================================
+# MONGODB USER SYNC
+# ============================================
+def sync_user_to_db():
+    """
+    Sync current user to MongoDB on login.
+    Creates user if not exists, loads their settings into session.
+    """
+    if not is_connected():
+        return False
+
+    email = get_user_email()
+    if not email:
+        return False
+
+    # Get or create user in MongoDB
+    user = get_or_create_user(
+        email=email,
+        name=get_user_name(),
+        picture=get_user_picture()
+    )
+
+    if user:
+        # Load user's API settings into session state
+        load_user_settings_from_db(email)
+        return True
+    return False
+
+
+def load_user_settings_from_db(email: str = None):
+    """Load user's API keys and MongoDB URI from database into session."""
+    if email is None:
+        email = get_user_email()
+    if not email:
+        return
+
+    # Load JSearch API settings
+    api_name, api_key = get_user_jsearch_api(email)
+    if api_key:
+        set_value('JSearch_API_name', api_name or "")
+        set_value('JSearch_API_value', api_key)
+
+    # Load MongoDB URI
+    mongo_uri = get_user_mongo_uri(email)
+    if mongo_uri:
+        set_value('MongoDB_Api_value', mongo_uri)
+
+
+def save_jsearch_api_to_db(api_key: str, api_name: str = "x-rapidapi-key") -> bool:
+    """Save user's JSearch API key to MongoDB."""
+    email = get_user_email()
+    if not email:
+        return False
+
+    success = update_user_jsearch_api(email, api_key, api_name)
+    if success:
+        set_value('JSearch_API_name', api_name)
+        set_value('JSearch_API_value', api_key)
+    return success
+
+
+def save_mongo_uri_to_db(mongo_uri: str) -> bool:
+    """Save user's personal MongoDB URI to database."""
+    email = get_user_email()
+    if not email:
+        return False
+
+    success = update_user_mongo_uri(email, mongo_uri)
+    if success:
+        set_value('MongoDB_Api_value', mongo_uri)
+    return success
+
+
+def user_has_jsearch_api() -> bool:
+    """Check if current user has configured JSearch API."""
+    email = get_user_email()
+    if not email:
+        return False
+    return has_user_configured_api(email)
+
+
+def user_has_mongo_uri() -> bool:
+    """Check if current user has configured their MongoDB URI."""
+    email = get_user_email()
+    if not email:
+        return False
+    return has_user_configured_mongo(email)
+
+
+def get_user_mongo_uri_from_session() -> str:
+    """Get the user's MongoDB URI from session state."""
+    return get_value('MongoDB_Api_value', '')
+
+
+def get_jsearch_api_from_session() -> tuple:
+    """Get JSearch API credentials from session. Returns (api_name, api_key)."""
+    return get_value('JSearch_API_name', ''), get_value('JSearch_API_value', '')
+
 
 # ============================================
 # AUTO-INITIALIZE ON IMPORT
