@@ -79,7 +79,13 @@ def my_queries_dialog():
 def settings_dialog():
     load_dotenv()
 
+    if not is_connected():
+        st.error("Please log in to save settings.")
+        return
+
     st.write("## API Key Configuration")
+
+    # JSearch Section
     st.write("### JSearch Key Configuration")
     jsearch_api_name = st.text_input(
         "Enter your JSearch api name",
@@ -96,6 +102,18 @@ def settings_dialog():
     )
     st.write("You can get your API key from [here](https://www.openwebninja.com/jsearch).")
 
+    if st.button("Save JSearch API", use_container_width=True):
+        if jsearch_api_value:
+            api_name = jsearch_api_name if jsearch_api_name else "x-rapidapi-key"
+            save_jsearch_api_to_db(jsearch_api_value, api_name)
+            st.success("JSearch API saved!")
+            st.rerun()
+        else:
+            st.warning("Please enter an API key.")
+
+    st.divider()
+
+    # MongoDB Section
     st.write("### MongoDB Key Configuration")
     mongo_uri = st.text_input(
         "Enter your MongoDB URI",
@@ -106,27 +124,10 @@ def settings_dialog():
     )
     st.write("You can get your MongoDB URI from [here](https://www.mongodb.com/).")
 
-    st.divider()
-
-    if st.button("Save Settings", type="primary", use_container_width=True):
-        if not is_connected():
-            st.error("Please log in to save settings.")
-            return
-
-        saved = False
-        # Save JSearch API if provided
-        if jsearch_api_value:
-            api_name = jsearch_api_name if jsearch_api_name else "x-rapidapi-key"
-            if save_jsearch_api_to_db(jsearch_api_value, api_name):
-                saved = True
-
-        # Save MongoDB URI if provided
+    if st.button("Save MongoDB URI", use_container_width=True):
         if mongo_uri:
-            if save_mongo_uri_to_db(mongo_uri):
-                saved = True
-
-        if saved:
-            st.success("Settings saved successfully!")
+            save_mongo_uri_to_db(mongo_uri)
+            st.success("MongoDB URI saved!")
             st.rerun()
         else:
-            st.warning("No changes to save or save failed.")
+            st.warning("Please enter a MongoDB URI.")

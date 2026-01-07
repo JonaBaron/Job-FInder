@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Main MongoDB connection (fixed - stores user data)
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-DB_NAME = os.getenv("MONGO_DB_NAME", "job_finder")
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = os.getenv("MONGO_DB_NAME")
 USERS_COLLECTION = "users"
 
 
