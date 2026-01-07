@@ -123,12 +123,12 @@ def find_jobs(query="Computer Engineering - Canada - internship", num_pages=2,qu
     response = requests.get(url, headers=headers, params=params)
     data = response.json()
 
-    for job_data in data.get('data', []):  # Changed from 'job' to 'job_data'
-        print(f"Title: {job_data.get('job_title')}")
-        print(f"Company: {job_data.get('employer_name')}")
-        print(f"Location: {job_data.get('job_city')}, {job_data.get('job_state')}")
-        print(f"Link: {job_data.get('job_apply_link')}")
-        print('-' * 50)
+    # for job_data in data.get('data', []):  # Changed from 'job' to 'job_data'
+    #     print(f"Title: {job_data.get('job_title')}")
+    #     print(f"Company: {job_data.get('employer_name')}")
+    #     print(f"Location: {job_data.get('job_city')}, {job_data.get('job_state')}")
+    #     print(f"Link: {job_data.get('job_apply_link')}")
+    #     print('-' * 50)
 
     return [
         job(
