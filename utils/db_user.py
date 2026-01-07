@@ -68,6 +68,7 @@ def get_or_create_user(email: str, name: str = None, picture: str = None) -> dic
 def update_user_mongo_uri(email: str, mongo_uri: str) -> bool:
     """
     Update user's personal MongoDB URI.
+    Creates user if not exists (upsert).
     Returns True if update was successful.
     """
     client, collection = get_users_collection()
@@ -78,10 +79,14 @@ def update_user_mongo_uri(email: str, mongo_uri: str) -> bool:
                 "$set": {
                     "mongo_uri": mongo_uri,
                     "updated_at": datetime.utcnow()
+                },
+                "$setOnInsert": {
+                    "created_at": datetime.utcnow()
                 }
-            }
+            },
+            upsert=True
         )
-        return result.modified_count > 0
+        return result.modified_count > 0 or result.upserted_id is not None
     finally:
         client.close()
 
@@ -89,6 +94,7 @@ def update_user_mongo_uri(email: str, mongo_uri: str) -> bool:
 def update_user_jsearch_api(email: str, api_key: str, api_name: str = "x-rapidapi-key") -> bool:
     """
     Update user's JSearch API credentials.
+    Creates user if not exists (upsert).
     Returns True if update was successful.
     """
     client, collection = get_users_collection()
@@ -100,10 +106,14 @@ def update_user_jsearch_api(email: str, api_key: str, api_name: str = "x-rapidap
                     "jsearch_api_key": api_key,
                     "jsearch_api_name": api_name,
                     "updated_at": datetime.utcnow()
+                },
+                "$setOnInsert": {
+                    "created_at": datetime.utcnow()
                 }
-            }
+            },
+            upsert=True
         )
-        return result.modified_count > 0
+        return result.modified_count > 0 or result.upserted_id is not None
     finally:
         client.close()
 

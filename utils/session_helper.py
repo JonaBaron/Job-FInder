@@ -237,28 +237,30 @@ def load_user_settings_from_db(email: str = None):
 
 
 def save_jsearch_api_to_db(api_key: str, api_name: str = "x-rapidapi-key") -> bool:
-    """Save user's JSearch API key to MongoDB."""
-    email = get_user_email()
-    if not email:
-        return False
+    """Save user's JSearch API key to MongoDB and session."""
+    # Always set session values first so current session works
+    set_value('JSearch_API_name', api_name)
+    set_value('JSearch_API_value', api_key)
 
-    success = update_user_jsearch_api(email, api_key, api_name)
-    if success:
-        set_value('JSearch_API_name', api_name)
-        set_value('JSearch_API_value', api_key)
-    return success
+    # Try to save to DB if user is logged in
+    email = get_user_email()
+    if email:
+        update_user_jsearch_api(email, api_key, api_name)
+
+    return True
 
 
 def save_mongo_uri_to_db(mongo_uri: str) -> bool:
-    """Save user's personal MongoDB URI to database."""
-    email = get_user_email()
-    if not email:
-        return False
+    """Save user's personal MongoDB URI to database and session."""
+    # Always set session value first so current session works
+    set_value('MongoDB_Api_value', mongo_uri)
 
-    success = update_user_mongo_uri(email, mongo_uri)
-    if success:
-        set_value('MongoDB_Api_value', mongo_uri)
-    return success
+    # Try to save to DB if user is logged in
+    email = get_user_email()
+    if email:
+        update_user_mongo_uri(email, mongo_uri)
+
+    return True
 
 
 def user_has_jsearch_api() -> bool:
