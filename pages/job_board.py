@@ -136,6 +136,9 @@ items_per_row = state.items_per_row
 if not is_api_configured():
     st.warning("Please configure your JSearch API key in Settings to search for jobs.")
 
+# Track seen job links to avoid showing duplicates across queries
+seen_job_links = set()
+
 for query_idx, query in enumerate(state.queries):
     with st.expander(f"**{query}** - Job Results", expanded=True):
 
@@ -179,9 +182,17 @@ for query_idx, query in enumerate(state.queries):
             target_status = status.get_status_num(sort_status)
             filtered_jobs = [job for job in filtered_jobs if job.get_status() == target_status]
 
+        # Filter out duplicates (jobs already shown in previous queries)
+        unique_jobs = [job for job in filtered_jobs if job.get_WEBLink() not in seen_job_links]
+        duplicates_hidden = len(filtered_jobs) - len(unique_jobs)
+        filtered_jobs = unique_jobs
+
         # Show filtered count if different from total
-        if len(filtered_jobs) != len(query_jobs):
-            st.caption(f"Showing **{len(filtered_jobs)}** of {len(query_jobs)} (filtered)")
+        if len(filtered_jobs) != len(query_jobs) or duplicates_hidden > 0:
+            filter_msg = f"Showing **{len(filtered_jobs)}** of {len(query_jobs)}"
+            if duplicates_hidden > 0:
+                filter_msg += f" ({duplicates_hidden} duplicates hidden)"
+            st.caption(filter_msg)
 
         # Handle no results
         if not filtered_jobs:
@@ -206,6 +217,10 @@ for query_idx, query in enumerate(state.queries):
                         display_job_card(display_job)
                         if display_job.status == status.ACCEPTED or display_job.status == status.OFFERED:
                             st.balloons()
+
+        # Add displayed jobs to seen set to hide them in subsequent queries
+        for job in filtered_jobs[:total_items]:
+            seen_job_links.add(job.get_WEBLink())
 
         # Load More button - fetches 10 more pages (up to 100 jobs) per click
         st.divider()
