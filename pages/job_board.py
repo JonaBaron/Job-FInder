@@ -238,3 +238,9 @@ for query_idx, query in enumerate(state.queries):
         with col_info:
             pages_loaded = state.pages_loaded[query_idx] if query_idx < len(state.pages_loaded) else 0
             st.caption(f"Pages loaded: {pages_loaded} | Jobs: {len(query_jobs)} | Each click loads ~100 more jobs")
+
+# ============================================
+# FOOTER
+# ============================================
+st.divider()
+st.caption("© 2025 Jonathan Mehmannavaz. All rights reserved.")

@@ -61,3 +61,7 @@ st.markdown("""
 - :material/track_changes: Track application status
 - :material/filter_list: Filter by company & status
 """)
+
+# Footer
+st.divider()
+st.caption("© 2025 Jonathan Mehmannavaz. All rights reserved.")

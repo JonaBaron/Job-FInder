@@ -9,28 +9,36 @@ from utils.session_helper import (
 #Info dialog
 @st.dialog("Info ℹ️")
 def info_dialog():
-    st.write("# Made by Jonathan Mehmannavaz👋")
+    st.write("# Job Bank")
+    st.write("### Made by Jonathan Mehmannavaz")
     st.write("""
-    ## An app made with intention  🎯
+    ## An app made with intention
 
     This Job Bank App is designed to help users find and manage job listings efficiently. Below are some key features and information about the app:
 
     ### Features:
-    - **Job Search**: Find job listings based on your queries.
-    - **Job Status Tracking**: Keep track of the status of each job application.
-    - **Custom Queries**: Add and manage your own job search queries.
-    - **Filters**: Sort and filter job listings based on status and company.
+    - **Job Search**: Find job listings based on your queries
+    - **Job Status Tracking**: Keep track of the status of each job application
+    - **Custom Queries**: Add and manage your own job search queries
+    - **Filters**: Sort and filter job listings based on status and company
+    - **Load More**: Efficiently load more jobs with pagination
 
     ### How to Use:
-    1. ....
- 
+    1. Sign in with your Google account
+    2. Configure your API keys in Settings
+    3. Add job search queries in "My Queries"
+    4. Browse and track your job applications
 
-    ### Follow ME!
+    ### Follow Me!
     """)
-    with st.container(horizontal=True): 
+    with st.container(horizontal=True):
         st.link_button("GitHub", icon=":material/code:", url="https://github.com/JonaBaron")
         st.link_button("LinkedIn", icon=":material/work:", url="https://www.linkedin.com/in/jonathan-mehmannavaz/")
         st.link_button("Webpage", icon=":material/web:", url="https://jonabaron.github.io/")
+
+    st.divider()
+    st.caption("© 2025 Jonathan Mehmannavaz. All rights reserved.")
+    st.caption("Licensed under the MIT License.")
    
 @st.dialog("My Queries 📋")
 def my_queries_dialog():
