@@ -68,8 +68,14 @@ st.sidebar.selectbox("Filter by company",
 )
 
 
-# Number of Jobs per page
-state.num_of_jobs_to_find = st.sidebar.number_input("Number of jobs to find", min_value=1, max_value=250, value=25, step=1)
+# Number of Jobs to display
+jobs_display_options = ["25", "50", "100", "200", "All"]
+selected_display = st.sidebar.selectbox(
+    "Jobs to display",
+    options=jobs_display_options,
+    index=0,
+    key="jobs_display_select"
+)
 
 # Job per line
 state.items_per_row = st.sidebar.number_input("Jobs per line", min_value=1, max_value=6, value=2, step=1)
@@ -109,7 +115,7 @@ with col1:
 with col2:
     st.metric("Active Queries", active_queries)
 with col3:
-    st.metric("Jobs per Page", state.num_of_jobs_to_find)
+    st.metric("Displaying", selected_display)
 with col4:
     st.metric("Grid Layout", f"{state.items_per_row} cols")
 
@@ -191,7 +197,11 @@ for query_idx, query in enumerate(state.queries):
             st.info("No jobs match your current filters. Try adjusting the filters in the sidebar.")
             continue
 
-        total_items = min(state.num_of_jobs_to_find, len(filtered_jobs))
+        # Calculate total items to display based on selection
+        if selected_display == "All":
+            total_items = len(filtered_jobs)
+        else:
+            total_items = min(int(selected_display), len(filtered_jobs))
         
         # Now create grid with only filtered jobs
         for row in range(0, total_items, items_per_row):

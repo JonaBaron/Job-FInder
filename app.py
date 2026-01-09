@@ -34,12 +34,21 @@ with st.container(border=True):
     st.write("")
 
     authorization_url = authenticator.get_authorization_url()
-    st.link_button(
-        "Continue with Google",
-        authorization_url,
-        use_container_width=True,
-        type="primary",
-        icon=":material/login:"
+    st.markdown(
+        f'''
+        <a href="{authorization_url}" target="_self" style="
+            display: inline-block;
+            width: 100%;
+            padding: 0.5rem 1rem;
+            background-color: #FF4B4B;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+        ">Continue with Google</a>
+        ''',
+        unsafe_allow_html=True
     )
 
 st.write("")
