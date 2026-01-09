@@ -1,6 +1,6 @@
 import streamlit as st
 from models.job import job, status
-from utils.session_helper import get_value, delete_job
+from utils.session_helper import get_value
 import webbrowser
 
 
@@ -58,9 +58,6 @@ def new_not_viewed(job_instance):
         flex.button("Link", key=f"link_{job_instance.id}",on_click=update_status)
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
-            delete_job(job_instance.id)
-            st.rerun()
 
         st.selectbox("Change of Status",
             options=["New - Not Viewed"],
@@ -84,9 +81,6 @@ def new_viewed(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
-            delete_job(job_instance.id)
-            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
@@ -116,9 +110,6 @@ def applied(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
-            delete_job(job_instance.id)
-            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
@@ -147,9 +138,6 @@ def under_review(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
-            delete_job(job_instance.id)
-            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
@@ -178,9 +166,6 @@ def interview_scheduled(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
-            delete_job(job_instance.id)
-            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
@@ -209,9 +194,6 @@ def shortlisted(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
-            delete_job(job_instance.id)
-            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
@@ -241,9 +223,6 @@ def rejected(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
-            delete_job(job_instance.id)
-            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
@@ -272,9 +251,6 @@ def offered(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
-            delete_job(job_instance.id)
-            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
@@ -304,9 +280,6 @@ def accepted(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
-            delete_job(job_instance.id)
-            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
@@ -335,9 +308,6 @@ def declined(job_instance):
         flex.link_button("Link", job_instance.get_WEBLink())
         flex.button("Details", key=f"details_{job_instance.id}")
         flex.button("Change Link", key=f"change_link_{job_instance.id}")
-        if flex.button("Delete", key=f"delete_{job_instance.id}", type="secondary"):
-            delete_job(job_instance.id)
-            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")

@@ -74,13 +74,24 @@ def find_jobs_test():
 
 
 # Main function to find jobs and return list of job instances
-def find_jobs(query="Computer Engineering - Canada - internship", num_pages=2,query_idx=0):
+def find_jobs(query="Computer Engineering - Canada - internship", num_pages=10, query_idx=0, page=1):
+    """
+    Find jobs using JSearch API.
 
+    Args:
+        query: Search query string
+        num_pages: Number of pages to fetch (10 jobs per page, max 10 pages = 100 jobs per call)
+        query_idx: Index of the query in the queries list
+        page: Starting page number for pagination
+
+    Returns:
+        List of job instances
+    """
     # Check if API is configured
     if not is_api_configured():
         return []
 
-    api_key_name, api_key_value , url = load_api_keys()
+    api_key_name, api_key_value, url = load_api_keys()
 
     headers = {
         api_key_name: api_key_value
@@ -88,7 +99,8 @@ def find_jobs(query="Computer Engineering - Canada - internship", num_pages=2,qu
 
     params = {
         "query": query,
-        "num_pages": num_pages
+        "num_pages": num_pages,
+        "page": page
     }
 
     response = requests.get(url, headers=headers, params=params)

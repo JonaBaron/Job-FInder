@@ -94,8 +94,9 @@ with col_title:
 with col_action:
     st.write("")  # Spacing
     if st.button("Refresh", icon=":material/refresh:", type="primary", use_container_width=True):
-        # Clear jobs to force refresh
+        # Clear jobs and pages_loaded to force refresh
         state.jobs = [[] for _ in range(len(state.queries))]
+        state.pages_loaded = [0 for _ in range(len(state.queries))]
         st.rerun()
 
 # Quick stats
@@ -123,6 +124,21 @@ items_per_row = state.items_per_row
 if not is_api_configured():
     st.warning("Please configure your JSearch API key in Settings to search for jobs.")
 
+def load_more_jobs(query_idx, query):
+    """Callback to load more jobs for a specific query."""
+    from utils.session_helper import get_pages_loaded, set_pages_loaded
+
+    pages_per_load = 10  # Load 10 pages at once (up to 100 jobs per API call)
+    current_pages = get_pages_loaded(query_idx)
+    next_page = current_pages + 1
+
+    new_jobs = find_jobs(query, pages_per_load, query_idx, page=next_page)
+
+    # Append new jobs to existing ones
+    if new_jobs:
+        state.jobs[query_idx].extend(new_jobs)
+        set_pages_loaded(query_idx, current_pages + pages_per_load)
+
 for query_idx, query in enumerate(state.queries):
     with st.expander(f"**{query}** - Job Results", expanded=True):
 
@@ -130,13 +146,19 @@ for query_idx, query in enumerate(state.queries):
         while len(state.jobs) <= query_idx:
             state.jobs.append([])
 
-        # Load jobs if empty
+        # Ensure pages_loaded list is long enough
+        while len(state.pages_loaded) <= query_idx:
+            state.pages_loaded.append(0)
+
+        # Load jobs if empty (initial load with 10 pages = up to 100 jobs)
         if state.jobs[query_idx] == []:
             if not is_api_configured():
                 st.info("Configure your API key in Settings to load jobs.")
             else:
                 with st.spinner(f"Searching jobs for '{query}'..."):
-                    state.jobs[query_idx] = find_jobs(query, 1, query_idx)
+                    pages_per_load = 10
+                    state.jobs[query_idx] = find_jobs(query, pages_per_load, query_idx, page=1)
+                    state.pages_loaded[query_idx] = pages_per_load
 
         # Get jobs for this query
         query_jobs = state.jobs[query_idx]
@@ -174,12 +196,30 @@ for query_idx, query in enumerate(state.queries):
         # Now create grid with only filtered jobs
         for row in range(0, total_items, items_per_row):
             cols = st.columns(items_per_row)
-            
+
             for i, col in enumerate(cols):
                 item_num = row + i
                 if item_num < total_items:
                     with col:
                         display_job = filtered_jobs[item_num]
-                        display_job_card(display_job) 
+                        display_job_card(display_job)
                         if display_job.status == status.ACCEPTED or display_job.status == status.OFFERED:
                             st.balloons()
+
+        # Load More button - fetches 10 more pages (up to 100 jobs) per click
+        st.divider()
+        col_load, col_info = st.columns([1, 2])
+        with col_load:
+            if st.button(
+                "Load More Jobs",
+                key=f"load_more_{query_idx}",
+                type="secondary",
+                use_container_width=True,
+                icon=":material/add:"
+            ):
+                with st.spinner(f"Loading more jobs for '{query}'..."):
+                    load_more_jobs(query_idx, query)
+                st.rerun()
+        with col_info:
+            pages_loaded = state.pages_loaded[query_idx] if query_idx < len(state.pages_loaded) else 0
+            st.caption(f"Pages loaded: {pages_loaded} | Jobs: {len(query_jobs)} | Each click loads ~100 more jobs")

@@ -34,6 +34,7 @@ DEFAULTS = {
     # Data storage
     'jobs': [],
     'companies': [],
+    'pages_loaded': [],  # Track pages loaded per query for "Load More"
 }
 
 # ============================================
@@ -48,6 +49,10 @@ def initialize_session_state():
     # Special case: jobs list depends on queries length
     if st.session_state.jobs == []:
         st.session_state.jobs = [[] for _ in range(len(st.session_state.queries))]
+
+    # Special case: pages_loaded list depends on queries length
+    if st.session_state.pages_loaded == []:
+        st.session_state.pages_loaded = [0 for _ in range(len(st.session_state.queries))]
 
     return st.session_state
 
@@ -121,6 +126,26 @@ def get_companies():
 
 def set_companies(companies):
     set_value('companies', companies)
+
+def get_pages_loaded(query_idx):
+    """Get pages loaded for a specific query."""
+    pages_loaded = get_value('pages_loaded')
+    while len(pages_loaded) <= query_idx:
+        pages_loaded.append(0)
+    return pages_loaded[query_idx]
+
+def set_pages_loaded(query_idx, pages):
+    """Set pages loaded for a specific query."""
+    pages_loaded = get_value('pages_loaded')
+    while len(pages_loaded) <= query_idx:
+        pages_loaded.append(0)
+    pages_loaded[query_idx] = pages
+    set_value('pages_loaded', pages_loaded)
+
+def increment_pages_loaded(query_idx, increment=10):
+    """Increment pages loaded for a query by a given amount."""
+    current = get_pages_loaded(query_idx)
+    set_pages_loaded(query_idx, current + increment)
 
 def delete_job(job_id):
     """Delete a job by its ID from all query lists."""
