@@ -74,14 +74,13 @@ def find_jobs_test():
 
 
 # Main function to find jobs and return list of job instances
-def find_jobs(query="Computer Engineering - Canada - internship", num_pages=10, query_idx=0, page=1):
+def find_jobs(query="Computer Engineering - Canada - internship", num_pages=10, page=1):
     """
     Find jobs using JSearch API.
 
     Args:
         query: Search query string
         num_pages: Number of pages to fetch (10 jobs per page, max 10 pages = 100 jobs per call)
-        query_idx: Index of the query in the queries list
         page: Starting page number for pagination
 
     Returns:
@@ -103,8 +102,16 @@ def find_jobs(query="Computer Engineering - Canada - internship", num_pages=10, 
         "page": page
     }
 
-    response = requests.get(url, headers=headers, params=params)
-    data = response.json()
+    try:
+        response = requests.get(url, headers=headers, params=params, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed: {e}")
+        return []
+    except ValueError as e:
+        print(f"Failed to parse API response: {e}")
+        return []
 
     return [
         job(

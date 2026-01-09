@@ -20,6 +20,26 @@ if state is None:
     st.stop()
 
 # ============================================
+# HELPER FUNCTIONS
+# ============================================
+def load_more_jobs(query_idx, query):
+    """Load more jobs for a specific query and append to existing jobs."""
+    from utils.session_helper import get_pages_loaded, set_pages_loaded
+
+    pages_per_load = 10  # Load 10 pages at once (up to 100 jobs per API call)
+    current_pages = get_pages_loaded(query_idx)
+    next_page = current_pages + 1
+
+    new_jobs = find_jobs(query, pages_per_load, page=next_page)
+
+    # Append new jobs, avoiding duplicates by link
+    if new_jobs:
+        existing_links = {job.get_WEBLink() for job in state.jobs[query_idx]}
+        unique_jobs = [job for job in new_jobs if job.get_WEBLink() not in existing_links]
+        state.jobs[query_idx].extend(unique_jobs)
+        set_pages_loaded(query_idx, current_pages + pages_per_load)
+
+# ============================================
 # SIDEBAR
 # ============================================
 # User profile section
@@ -130,21 +150,6 @@ items_per_row = state.items_per_row
 if not is_api_configured():
     st.warning("Please configure your JSearch API key in Settings to search for jobs.")
 
-def load_more_jobs(query_idx, query):
-    """Callback to load more jobs for a specific query."""
-    from utils.session_helper import get_pages_loaded, set_pages_loaded
-
-    pages_per_load = 10  # Load 10 pages at once (up to 100 jobs per API call)
-    current_pages = get_pages_loaded(query_idx)
-    next_page = current_pages + 1
-
-    new_jobs = find_jobs(query, pages_per_load, query_idx, page=next_page)
-
-    # Append new jobs to existing ones
-    if new_jobs:
-        state.jobs[query_idx].extend(new_jobs)
-        set_pages_loaded(query_idx, current_pages + pages_per_load)
-
 for query_idx, query in enumerate(state.queries):
     with st.expander(f"**{query}** - Job Results", expanded=True):
 
@@ -163,7 +168,7 @@ for query_idx, query in enumerate(state.queries):
             else:
                 with st.spinner(f"Searching jobs for '{query}'..."):
                     pages_per_load = 10
-                    state.jobs[query_idx] = find_jobs(query, pages_per_load, query_idx, page=1)
+                    state.jobs[query_idx] = find_jobs(query, pages_per_load, page=1)
                     state.pages_loaded[query_idx] = pages_per_load
 
         # Get jobs for this query

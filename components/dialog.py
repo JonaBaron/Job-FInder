@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 from utils.session_helper import (
-    get_queries, set_queries, get_jobs, set_jobs, get_value,
+    get_queries, set_queries, get_jobs, set_jobs, get_value, set_value,
     save_jsearch_api_to_db, save_mongo_uri_to_db, is_connected
 )
 
@@ -106,9 +106,10 @@ def settings_dialog():
         if jsearch_api_value:
             api_name = jsearch_api_name if jsearch_api_name else "x-rapidapi-key"
             save_jsearch_api_to_db(jsearch_api_value, api_name)
-            # Clear jobs to trigger fresh fetch with new API key
+            # Clear jobs and pages_loaded to trigger fresh fetch with new API key
             queries = get_queries()
             set_jobs([[] for _ in range(len(queries))])
+            set_value('pages_loaded', [0 for _ in range(len(queries))])
             st.success("JSearch API saved! Refreshing jobs...")
             # Remind about MongoDB if not configured
             if not get_value("MongoDB_Api_value", ""):

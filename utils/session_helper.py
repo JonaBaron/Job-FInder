@@ -29,7 +29,6 @@ DEFAULTS = {
 
     # Display settings
     'items_per_row': 2,
-    'num_of_jobs_to_find': 25,
 
     # Data storage
     'jobs': [],
@@ -193,12 +192,6 @@ def get_items_per_row():
 
 def set_items_per_row(value):
     set_value('items_per_row', value)
-
-def get_num_jobs_to_find():
-    return get_value('num_of_jobs_to_find')
-
-def set_num_jobs_to_find(value):
-    set_value('num_of_jobs_to_find', value)
 
 # ============================================
 # RESET HELPERS
