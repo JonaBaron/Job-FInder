@@ -3,8 +3,9 @@ import os
 from dotenv import load_dotenv
 from utils.session_helper import (
     get_queries, set_queries, get_jobs, set_jobs, get_value, set_value,
-    save_jsearch_api_to_db, save_mongo_uri_to_db, is_connected
+    save_jsearch_api_to_db, is_connected, get_user_email
 )
+from utils.db_jobs import sync_jobs_to_db
 
 #Info dialog
 @st.dialog("Info ℹ️")
@@ -62,6 +63,10 @@ def my_queries_dialog():
         jobs.pop(to_delete)
         set_queries(queries)
         set_jobs(jobs)
+        # Sync to DB after deleting query
+        email = get_user_email()
+        if email:
+            sync_jobs_to_db(email, queries, jobs)
         st.rerun()
 
     user_input = st.text_input("Add a query to your list:", key="new_query")
@@ -74,6 +79,10 @@ def my_queries_dialog():
                 jobs.append([])
                 set_queries(queries)
                 set_jobs(jobs)
+                # Sync to DB after adding query
+                email = get_user_email()
+                if email:
+                    sync_jobs_to_db(email, queries, jobs)
                 st.success("Query added successfully!")
                 st.rerun()
             else:
@@ -119,33 +128,47 @@ def settings_dialog():
             set_jobs([[] for _ in range(len(queries))])
             set_value('pages_loaded', [0 for _ in range(len(queries))])
             st.success("JSearch API saved! Refreshing jobs...")
-            # Remind about MongoDB if not configured
-            if not get_value("MongoDB_Api_value", ""):
-                st.toast("Don't forget to configure your MongoDB URI to save jobs!", icon="💾")
             st.rerun()
         else:
             st.warning("Please enter an API key.")
 
-    st.divider()
 
-    # MongoDB Section
-    st.write("### MongoDB Key Configuration")
-    mongo_uri = st.text_input(
-        "Enter your MongoDB URI",
-        placeholder="ex: mongodb+srv://user:pass@cluster.mongodb.net",
-        value=get_value("MongoDB_Api_value", ""),
-        key="MongoDB_Api_value",
-        type="password"
+# Edit Link dialog
+@st.dialog("Edit Job Link")
+def edit_link_dialog(job_instance, query_idx: int):
+    """Dialog to edit a job's link when the original doesn't work."""
+    from utils.db_jobs import update_job_link
+    from utils.session_helper import get_user_email
+
+    st.write(f"**{job_instance.get_title()}**")
+    st.caption(f"{job_instance.get_company()}")
+
+    st.write("**Current Link:**")
+    current_link = job_instance.get_WEBLink()
+    st.code(current_link if current_link else "No link available")
+
+    new_link = st.text_input(
+        "Enter new link:",
+        placeholder="https://example.com/job/apply",
+        key="new_job_link"
     )
-    st.write("You can get your MongoDB URI from [here](https://www.mongodb.com/).")
 
-    if st.button("Save MongoDB URI", use_container_width=True):
-        if mongo_uri:
-            save_mongo_uri_to_db(mongo_uri)
-            st.success("MongoDB URI saved!")
-            # Remind about JSearch if not configured
-            if not get_value("JSearch_API_value", ""):
-                st.toast("Don't forget to configure your JSearch API to search jobs!", icon="🔍")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Cancel", use_container_width=True):
             st.rerun()
-        else:
-            st.warning("Please enter a MongoDB URI.")
+    with col2:
+        if st.button("Save Link", use_container_width=True, type="primary"):
+            if new_link.strip():
+                old_link = current_link
+                job_instance.set_WEBLink(new_link.strip())
+
+                # Save to database
+                email = get_user_email()
+                if email:
+                    update_job_link(email, query_idx, job_instance.id, old_link, new_link.strip())
+
+                st.success("Link updated!")
+                st.rerun()
+            else:
+                st.warning("Please enter a valid URL.")

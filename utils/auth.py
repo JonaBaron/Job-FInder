@@ -7,13 +7,15 @@ from utils.session_helper import is_connected, sync_user_to_db
 load_dotenv()
 
 def get_authenticator():
-    """Create and return the authenticator instance."""
-    return Authenticate(
-        secret_credentials_path='google_credentials.json',
-        cookie_name='job_bank_auth',
-        cookie_key=os.getenv('COOKIE_SECRET', 'change_this_secret_key'),
-        redirect_uri=os.getenv('REDIRECT_URI', 'http://localhost:8501'),
-    )
+    """Get or create the authenticator instance (cached in session state)."""
+    if 'authenticator' not in st.session_state:
+        st.session_state.authenticator = Authenticate(
+            secret_credentials_path='google_credentials.json',
+            cookie_name='job_bank_auth',
+            cookie_key=os.getenv('COOKIE_SECRET', 'change_this_secret_key'),
+            redirect_uri=os.getenv('REDIRECT_URI', 'http://localhost:8501'),
+        )
+    return st.session_state.authenticator
 
 def check_auth():
     """Check if user is authenticated. Returns True if logged in."""

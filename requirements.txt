@@ -1,1 +1,6 @@
-streamlit
+streamlit>=1.28.0
+streamlit-google-auth>=0.1.0
+pymongo>=4.6.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+natsort>=8.4.0

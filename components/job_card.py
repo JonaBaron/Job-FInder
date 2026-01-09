@@ -1,63 +1,78 @@
 import streamlit as st
 from models.job import job, status
-from utils.session_helper import get_value
+from utils.session_helper import get_value, set_value, get_user_email, get_queries, get_jobs
+from utils.db_jobs import sync_jobs_to_db
 import webbrowser
 
 
-def display_job_card(job_instance):
+def display_job_card(job_instance, query_idx: int = 0):
+    """Display a job card with the appropriate status styling."""
+    job_type = job_instance.get_status()
 
-    type = job_instance.get_status()
+    if job_type == status.NEW_NOT_VIEWED:
+        new_not_viewed(job_instance, query_idx)
+    elif job_type == status.NEW_VIEWED:
+        new_viewed(job_instance, query_idx)
+    elif job_type == status.APPLIED:
+        applied(job_instance, query_idx)
+    elif job_type == status.UNDER_REVIEW:
+        under_review(job_instance, query_idx)
+    elif job_type == status.INTERVIEW_SCHEDULED:
+        interview_scheduled(job_instance, query_idx)
+    elif job_type == status.SHORTLISTED:
+        shortlisted(job_instance, query_idx)
+    elif job_type == status.REJECTED:
+        rejected(job_instance, query_idx)
+    elif job_type == status.OFFERED:
+        offered(job_instance, query_idx)
+    elif job_type == status.ACCEPTED:
+        accepted(job_instance, query_idx)
+    elif job_type == status.DECLINED:
+        declined(job_instance, query_idx)
 
-    if type == status.NEW_NOT_VIEWED:
-        new_not_viewed(job_instance)
-    
-    elif type == status.NEW_VIEWED:
-        new_viewed(job_instance)
 
-    elif type == status.APPLIED:
-        applied(job_instance)
-    
-    elif type == status.UNDER_REVIEW:
-        under_review(job_instance)
-    
-    elif type == status.INTERVIEW_SCHEDULED:
-        interview_scheduled(job_instance)
+def request_edit_link(job_instance, query_idx: int):
+    """Store job info in session state to trigger edit link dialog."""
+    set_value('edit_link_job', job_instance)
+    set_value('edit_link_query_idx', query_idx)
 
-    elif type == status.SHORTLISTED:
-        shortlisted(job_instance)
 
-    elif type == status.REJECTED:
-        rejected(job_instance)
+def handle_link_click(job_instance):
+    """Log link click and open the link."""
+    job_instance.log_link_click()
+    webbrowser.open(job_instance.get_WEBLink())
 
-    elif type == status.OFFERED:
-        offered(job_instance)
 
-    elif type == status.ACCEPTED:
-        accepted(job_instance)
+def sync_after_change():
+    """Sync jobs to database after any change."""
+    email = get_user_email()
+    if email:
+        queries = get_queries()
+        jobs = get_jobs()
+        sync_jobs_to_db(email, queries, jobs)
 
-    elif type == status.DECLINED:
-        declined(job_instance)
-
-def new_not_viewed(job_instance):
+def new_not_viewed(job_instance, query_idx: int):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
-        
-        # Blue pill badges with margin for spacing
+
         st.markdown(
             '<span style="background-color: #3454D1; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">New</span>'
             '<span style="background-color: #E63946; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px;">Not viewed</span>',
             unsafe_allow_html=True
         )
-        
-        def update_status():
-            webbrowser.open(job_instance.get_WEBLink())
+
+        def on_link_click():
+            handle_link_click(job_instance)
             job_instance.set_status(status.NEW_VIEWED)
+            sync_after_change()
 
         flex = st.container(horizontal=True)
-        flex.button("Link", key=f"link_{job_instance.id}",on_click=update_status)
+        flex.button("Link", key=f"link_{job_instance.id}", on_click=on_link_click)
         flex.button("Details", key=f"details_{job_instance.id}")
-        flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Edit Link", key=f"change_link_{job_instance.id}"):
+            request_edit_link(job_instance, query_idx)
+            st.rerun()
 
         st.selectbox("Change of Status",
             options=["New - Not Viewed"],
@@ -65,27 +80,30 @@ def new_not_viewed(job_instance):
             index=status.NEW_NOT_VIEWED - 1
         )   
 
-def new_viewed(job_instance):
+def new_viewed(job_instance, query_idx: int):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
-        
-        # Blue pill badges with margin for spacing
+
         st.markdown(
             '<span style="background-color: #3454D1; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">New</span>'
             '<span style="background-color: #3C887E; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px;">Viewed</span>',
             unsafe_allow_html=True
         )
-        
+
         flex = st.container(horizontal=True)
-        flex.link_button("Link", job_instance.get_WEBLink())
+        if flex.button("Link", key=f"link_{job_instance.id}"):
+            handle_link_click(job_instance)
         flex.button("Details", key=f"details_{job_instance.id}")
-        flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Edit Link", key=f"change_link_{job_instance.id}"):
+            request_edit_link(job_instance, query_idx)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
+            sync_after_change()
 
         st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
@@ -95,26 +113,29 @@ def new_viewed(job_instance):
         )
 
 
-def applied(job_instance):
+def applied(job_instance, query_idx: int):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
-        
-        # Green pill badge for applied
+
         st.markdown(
             '<span style="background-color: #4CAF50; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">Applied</span>',
             unsafe_allow_html=True
         )
-        
+
         flex = st.container(horizontal=True)
-        flex.link_button("Link", job_instance.get_WEBLink())
+        if flex.button("Link", key=f"link_{job_instance.id}"):
+            handle_link_click(job_instance)
         flex.button("Details", key=f"details_{job_instance.id}")
-        flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Edit Link", key=f"change_link_{job_instance.id}"):
+            request_edit_link(job_instance, query_idx)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
+            sync_after_change()
 
         st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
@@ -123,26 +144,30 @@ def applied(job_instance):
             on_change=update_status
         )
 
-def under_review(job_instance):
+
+def under_review(job_instance, query_idx: int):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
-        
-        # Orange pill badge for under review
+
         st.markdown(
-            '<span style="background-color: #FF9800; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">under review</span>', 
+            '<span style="background-color: #FF9800; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">Under Review</span>',
             unsafe_allow_html=True
         )
-        
+
         flex = st.container(horizontal=True)
-        flex.link_button("Link", job_instance.get_WEBLink())
+        if flex.button("Link", key=f"link_{job_instance.id}"):
+            handle_link_click(job_instance)
         flex.button("Details", key=f"details_{job_instance.id}")
-        flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Edit Link", key=f"change_link_{job_instance.id}"):
+            request_edit_link(job_instance, query_idx)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
+            sync_after_change()
 
         st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
@@ -151,26 +176,30 @@ def under_review(job_instance):
             on_change=update_status
         )
 
-def interview_scheduled(job_instance):
+
+def interview_scheduled(job_instance, query_idx: int):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
-        
-        # Purple pill badge for interview scheduled
+
         st.markdown(
-            '<span style="background-color: #9C27B0; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">interview scheduled</span>',
+            '<span style="background-color: #9C27B0; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">Interview Scheduled</span>',
             unsafe_allow_html=True
         )
-        
+
         flex = st.container(horizontal=True)
-        flex.link_button("Link", job_instance.get_WEBLink())
+        if flex.button("Link", key=f"link_{job_instance.id}"):
+            handle_link_click(job_instance)
         flex.button("Details", key=f"details_{job_instance.id}")
-        flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Edit Link", key=f"change_link_{job_instance.id}"):
+            request_edit_link(job_instance, query_idx)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
+            sync_after_change()
 
         st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
@@ -179,26 +208,30 @@ def interview_scheduled(job_instance):
             on_change=update_status
         )
 
-def shortlisted(job_instance):
+
+def shortlisted(job_instance, query_idx: int):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
-        
-        # Teal pill badge for shortlisted
+
         st.markdown(
-            '<span style="background-color: #F6C28B; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">shortlisted</span>',
+            '<span style="background-color: #F6C28B; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">Shortlisted</span>',
             unsafe_allow_html=True
         )
-        
+
         flex = st.container(horizontal=True)
-        flex.link_button("Link", job_instance.get_WEBLink())
+        if flex.button("Link", key=f"link_{job_instance.id}"):
+            handle_link_click(job_instance)
         flex.button("Details", key=f"details_{job_instance.id}")
-        flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Edit Link", key=f"change_link_{job_instance.id}"):
+            request_edit_link(job_instance, query_idx)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
+            sync_after_change()
 
         st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
@@ -208,26 +241,29 @@ def shortlisted(job_instance):
         )
 
 
-def rejected(job_instance):
+def rejected(job_instance, query_idx: int):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
-        
-        # Red pill badge for rejected
+
         st.markdown(
-            '<span style="background-color: #F44336; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">rejected</span>',
+            '<span style="background-color: #F44336; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">Rejected</span>',
             unsafe_allow_html=True
         )
-        
+
         flex = st.container(horizontal=True)
-        flex.link_button("Link", job_instance.get_WEBLink())
+        if flex.button("Link", key=f"link_{job_instance.id}"):
+            handle_link_click(job_instance)
         flex.button("Details", key=f"details_{job_instance.id}")
-        flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Edit Link", key=f"change_link_{job_instance.id}"):
+            request_edit_link(job_instance, query_idx)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
+            sync_after_change()
 
         st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
@@ -236,26 +272,30 @@ def rejected(job_instance):
             on_change=update_status
         )
 
-def offered(job_instance):
+
+def offered(job_instance, query_idx: int):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
-        
-        # Gold pill badge for offered
+
         st.markdown(
-            '<span style="background-color: #FFD700; color: black; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">offered</span>',
+            '<span style="background-color: #FFD700; color: black; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">Offered</span>',
             unsafe_allow_html=True
         )
-        
+
         flex = st.container(horizontal=True)
-        flex.link_button("Link", job_instance.get_WEBLink())
+        if flex.button("Link", key=f"link_{job_instance.id}"):
+            handle_link_click(job_instance)
         flex.button("Details", key=f"details_{job_instance.id}")
-        flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Edit Link", key=f"change_link_{job_instance.id}"):
+            request_edit_link(job_instance, query_idx)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
+            sync_after_change()
 
         st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
@@ -265,26 +305,29 @@ def offered(job_instance):
         )
 
 
-def accepted(job_instance):
+def accepted(job_instance, query_idx: int):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
-        
-        # Green pill badge for accepted
+
         st.markdown(
-            '<span style="background-color: #4CAF50; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">accepted</span>',
+            '<span style="background-color: #4CAF50; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">Accepted</span>',
             unsafe_allow_html=True
         )
-        
+
         flex = st.container(horizontal=True)
-        flex.link_button("Link", job_instance.get_WEBLink())
+        if flex.button("Link", key=f"link_{job_instance.id}"):
+            handle_link_click(job_instance)
         flex.button("Details", key=f"details_{job_instance.id}")
-        flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Edit Link", key=f"change_link_{job_instance.id}"):
+            request_edit_link(job_instance, query_idx)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
+            sync_after_change()
 
         st.selectbox("Change of Status",
             options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
@@ -294,34 +337,33 @@ def accepted(job_instance):
         )
 
 
-def declined(job_instance):
+def declined(job_instance, query_idx: int):
     with st.container(border=True):
         st.write(job_instance.get_title())
         st.write(f"{job_instance.get_company()}, {job_instance.get_location()}")
-        
+
         st.markdown(
-            '<span style="background-color: #9E9E9E; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">declined</span>',
+            '<span style="background-color: #9E9E9E; color: white; padding: 4px 12px; border-radius: 16px; font-size: 14px; margin-right: 8px;">Declined</span>',
             unsafe_allow_html=True
         )
-        
+
         flex = st.container(horizontal=True)
-        flex.link_button("Link", job_instance.get_WEBLink())
+        if flex.button("Link", key=f"link_{job_instance.id}"):
+            handle_link_click(job_instance)
         flex.button("Details", key=f"details_{job_instance.id}")
-        flex.button("Change Link", key=f"change_link_{job_instance.id}")
+        if flex.button("Edit Link", key=f"change_link_{job_instance.id}"):
+            request_edit_link(job_instance, query_idx)
+            st.rerun()
 
         def update_status():
             new_status_str = get_value(f"status_{job_instance.id}")
             new_status_num = status.get_status_num(new_status_str)
             job_instance.set_status(new_status_num)
+            sync_after_change()
 
-        current_status_index = job_instance.get_status() - 1
-
-        st.selectbox(
-            "Change of Status",
-            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review",
-                     "Interview Scheduled", "Shortlisted", "Rejected", "Offered",
-                     "Accepted", "Declined"],
+        st.selectbox("Change of Status",
+            options=["New - Not Viewed", "New - Viewed", "Applied", "Under Review", "Interview Scheduled", "Shortlisted", "Rejected", "Offered", "Accepted", "Declined"],
             key=f"status_{job_instance.id}",
-            index=current_status_index,
+            index=status.DECLINED - 1,
             on_change=update_status
         )

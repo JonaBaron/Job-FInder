@@ -4,7 +4,8 @@ from components.job_card import *
 from utils.job_finder import *
 from components.dialog import *
 from utils.session_helper import *
-from utils.auth import logout
+from utils.auth import logout, require_auth
+from utils.db_jobs import sync_jobs_to_db, load_jobs_from_db
 from natsort import natsorted
 
 st.set_page_config(
@@ -18,6 +19,30 @@ state = initialize_session_state()
 if state is None:
     st.error("Error initializing session state.")
     st.stop()
+
+# Check authentication and load user settings from database
+require_auth()
+
+# Load jobs from database on first load (if not already loaded)
+if 'db_loaded' not in st.session_state:
+    email = get_user_email()
+    if email:
+        saved_queries, saved_jobs = load_jobs_from_db(email)
+        if saved_queries and saved_jobs:
+            # Merge saved data with session (prefer saved data)
+            state.queries = saved_queries
+            state.jobs = saved_jobs
+            state.pages_loaded = [10 for _ in range(len(saved_queries))]
+    st.session_state.db_loaded = True
+
+# Check if edit link dialog should be shown
+if get_value('edit_link_job') is not None:
+    from components.dialog import edit_link_dialog
+    job_to_edit = get_value('edit_link_job')
+    query_idx = get_value('edit_link_query_idx', 0)
+    set_value('edit_link_job', None)
+    set_value('edit_link_query_idx', None)
+    edit_link_dialog(job_to_edit, query_idx)
 
 # ============================================
 # HELPER FUNCTIONS
@@ -119,11 +144,25 @@ with col_title:
 
 with col_action:
     st.write("")  # Spacing
-    if st.button("Refresh", icon=":material/refresh:", type="primary", use_container_width=True):
-        # Clear jobs and pages_loaded to force refresh
-        state.jobs = [[] for _ in range(len(state.queries))]
-        state.pages_loaded = [0 for _ in range(len(state.queries))]
-        st.rerun()
+    col_refresh, col_save = st.columns(2)
+    with col_refresh:
+        if st.button("Refresh", icon=":material/refresh:", type="primary", use_container_width=True):
+            # Save current jobs to DB before refresh
+            email = get_user_email()
+            if email and state.jobs:
+                sync_jobs_to_db(email, state.queries, state.jobs)
+            # Clear jobs and pages_loaded to force refresh
+            state.jobs = [[] for _ in range(len(state.queries))]
+            state.pages_loaded = [0 for _ in range(len(state.queries))]
+            st.rerun()
+    with col_save:
+        if st.button("Save", icon=":material/save:", type="secondary", use_container_width=True):
+            email = get_user_email()
+            if email and state.jobs:
+                with st.spinner("Saving to database..."):
+                    sync_jobs_to_db(email, state.queries, state.jobs)
+                st.success("Jobs saved!")
+                st.rerun()
 
 st.divider()
 
@@ -159,6 +198,10 @@ for query_idx, query in enumerate(state.queries):
                     pages_per_load = 10
                     state.jobs[query_idx] = find_jobs(query, pages_per_load, page=1)
                     state.pages_loaded[query_idx] = pages_per_load
+                    # Auto-sync to DB after initial load
+                    email = get_user_email()
+                    if email:
+                        sync_jobs_to_db(email, state.queries, state.jobs)
 
         # Get jobs for this query
         query_jobs = state.jobs[query_idx]
@@ -214,7 +257,7 @@ for query_idx, query in enumerate(state.queries):
                 if item_num < total_items:
                     with col:
                         display_job = filtered_jobs[item_num]
-                        display_job_card(display_job)
+                        display_job_card(display_job, query_idx)
                         if display_job.status == status.ACCEPTED or display_job.status == status.OFFERED:
                             st.balloons()
 
@@ -235,6 +278,10 @@ for query_idx, query in enumerate(state.queries):
             ):
                 with st.spinner(f"Loading more jobs for '{query}'..."):
                     load_more_jobs(query_idx, query)
+                    # Auto-sync to DB after loading more jobs
+                    email = get_user_email()
+                    if email:
+                        sync_jobs_to_db(email, state.queries, state.jobs)
                 st.rerun()
         with col_info:
             pages_loaded = state.pages_loaded[query_idx] if query_idx < len(state.pages_loaded) else 0

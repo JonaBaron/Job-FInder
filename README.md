@@ -41,11 +41,19 @@ A Streamlit-based job search and application tracking tool that helps you find a
    pip install -r requirements.txt
    ```
 
-3. Create a `.env` file with your configuration:
+3. Create a `.env` file (copy from `.env.example`):
    ```env
-   COOKIE_SECRET=your_cookie_secret
-   REDIRECT_URI=http://localhost:8501
-   MONGODB_URI=your_mongodb_uri
+   # JSearch API
+   JSearch_API_name=x-api-key
+   JSearch_API_value=your_jsearch_api_key
+
+   # User database (authentication, settings)
+   MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/
+   MONGO_DB_NAME=user_db
+
+   # Jobs database (job listings, tracking)
+   JOBS_MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/
+   JOBS_DB_NAME=jobs_db
    ```
 
 4. Add your Google OAuth credentials in `google_credentials.json`
@@ -57,9 +65,10 @@ A Streamlit-based job search and application tracking tool that helps you find a
 
 ### Configuration
 
-After logging in, configure your API keys in **Settings**:
+After logging in, configure your JSearch API key in **Settings**:
 - **JSearch API**: Get your key from [OpenWebNinja](https://www.openwebninja.com/jsearch)
-- **MongoDB URI**: Get your connection string from [MongoDB Atlas](https://www.mongodb.com/)
+
+MongoDB connections are configured via the `.env` file (not in the app settings).
 
 ## Usage
 
@@ -85,7 +94,7 @@ Job Finder/
 │   ├── auth.py            # Authentication utilities
 │   ├── db.py              # Database connection
 │   ├── db_user.py         # User database operations
-│   ├── db_job.py          # Job database operations
+│   ├── db_jobs.py         # Job database operations
 │   ├── job_finder.py      # JSearch API integration
 │   └── session_helper.py  # Session state management
 └── google_credentials.json # Google OAuth credentials (not in repo)
