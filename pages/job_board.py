@@ -125,20 +125,6 @@ with col_action:
         state.pages_loaded = [0 for _ in range(len(state.queries))]
         st.rerun()
 
-# Quick stats
-total_jobs = sum(len(jobs) for jobs in state.jobs)
-active_queries = len(state.queries)
-
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.metric("Total Jobs", total_jobs)
-with col2:
-    st.metric("Active Queries", active_queries)
-with col3:
-    st.metric("Displaying", selected_display)
-with col4:
-    st.metric("Grid Layout", f"{state.items_per_row} cols")
-
 st.divider()
 
 # ============================================
