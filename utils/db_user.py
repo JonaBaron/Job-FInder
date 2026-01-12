@@ -1,9 +1,12 @@
 from pymongo import MongoClient
 from datetime import datetime
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from project root
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(env_path)
 
 # Main MongoDB connection (fixed - stores user data)
 MONGO_URI = os.getenv("MONGO_URI")
